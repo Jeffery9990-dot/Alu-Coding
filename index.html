@@ -616,7 +616,24 @@ function sendMfaCodeByEmail(toEmail,code){
   return fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:state.emailjsServiceId,template_id:state.emailjsTemplateId,user_id:state.emailjsPublicKey,template_params:{to_email:toEmail,passcode:code}})}).then(function(res){if(!res.ok)throw new Error("EmailJS returned HTTP "+res.status);});
 }
 
-function compileViaApi(code,boardId){
+function compileViaApi(code,boardId){function sendMfaCodeByEmail(toEmail, code){
+  var formData = new FormData();
+  formData.append("access_key", "8c734b51-a227-43b8-99a9-d775eaaa3a5e");
+  formData.append("subject", "Your Alu-Coding passcode");
+  formData.append("from_name", "Alu-Coding");
+  formData.append("email", toEmail);
+  formData.append("message", "Your Alu-Coding verification code is: " + code);
+  return fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    body: formData
+  }).then(function(res){
+    if(!res.ok) throw new Error("Web3Forms returned HTTP " + res.status);
+    return res.json();
+  }).then(function(data){
+    if(!data.success) throw new Error(data.message || "Web3Forms send failed");
+  });
+}
+
   if(!state.compilerApiUrl)return Promise.reject(new Error("no compiler API configured"));
   return fetch(state.compilerApiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,board:boardId})}).then(function(res){if(!res.ok)throw new Error("compiler API returned HTTP "+res.status);return res.json();}).then(function(result){if(!result||!result.success||!result.hex)throw new Error((result&&result.error)||"compiler API returned no hex output");return result.hex;});
 }
