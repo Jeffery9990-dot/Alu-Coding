@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alu-Coding — Write it. Flash it. Ship it.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A121C;--bg-raised:#101C2B;--bg-panel:#0D1826;--line:#1D2E40;
+    --turquoise:#2FE0C4;--turquoise-dim:#17A88E;--coral:#FF6F59;--coral-dim:#E85A47;
+    --text:#EAF3F1;--text-muted:#83A0AC;--text-faint:#4C6472;
+    --danger:#FF6F59;--ok:#2FE0C4;--warn:#FFC24B;--radius:10px;
+    --font-display:'Space Grotesk',sans-serif;--font-body:'Inter',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:radial-gradient(circle at 15% 0%,rgba(47,224,196,0.08),transparent 40%),radial-gradient(circle at 85% 20%,rgba(255,111,89,0.07),transparent 45%),var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.5;min-height:100%;}
+  a{color:inherit;}button{font-family:inherit;cursor:pointer;}
+  ::selection{background:var(--turquoise);color:#04241E;}
+  :focus-visible{outline:2px solid var(--turquoise);outline-offset:2px;}
+  .trace-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  #landing,#app-view{position:relative;z-index:1;}
+  .hidden{display:none!important;}
+  header.top{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line);}
+  .logo-mark{display:flex;align-items:center;gap:12px;}.logo-mark svg{display:block;}
+  .logo-mark .name{font-family:var(--font-display);font-weight:700;font-size:1.25rem;letter-spacing:0.01em;}
+  .logo-mark .name span{color:var(--coral);}
+  .top-actions{display:flex;align-items:center;gap:14px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);font-weight:500;font-size:0.92rem;transition:border-color .15s,transform .1s,background .15s;}
+  .btn:hover{border-color:var(--turquoise);background:rgba(47,224,196,0.06);}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:linear-gradient(100deg,var(--turquoise) 0%,var(--turquoise-dim) 100%);color:#04241E;border:none;font-weight:600;}
+  .btn-primary:hover{filter:brightness(1.07);}
+  .btn-coral{background:linear-gradient(100deg,var(--coral) 0%,var(--coral-dim) 100%);color:#2A0B06;border:none;font-weight:600;}
+  .btn-ghost{border-color:transparent;color:var(--text-muted);}
+  .btn-ghost:hover{color:var(--text);border-color:var(--line);}
+  .btn-sm{padding:6px 12px;font-size:0.8rem;border-radius:6px;}
+  .btn:disabled{opacity:0.45;cursor:not-allowed;}
+  .hero{padding:76px 0 40px;text-align:left;}
+  .eyebrow{font-family:var(--font-mono);font-size:0.78rem;color:var(--turquoise);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+  .eyebrow::before{content:'';width:22px;height:1px;background:var(--turquoise);}
+  h1.hero-title{font-family:var(--font-display);font-weight:700;font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.08;letter-spacing:-0.01em;max-width:760px;}
+  h1.hero-title .grad{background:linear-gradient(95deg,var(--turquoise),var(--coral));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero-sub{margin-top:20px;font-size:1.05rem;color:var(--text-muted);max-width:560px;}
+  .feature-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);margin-top:44px;overflow:hidden;}
+  .feature-cell{background:var(--bg-panel);padding:18px 16px;}
+  .feature-cell .fk{font-family:var(--font-mono);font-size:0.72rem;color:var(--text-faint);}
+  .feature-cell .fv{font-family:var(--font-display);font-weight:600;font-size:0.95rem;margin-top:6px;}
+  @media(max-width:760px){.feature-strip{grid-template-columns:repeat(2,1fr);}}
+  .section-label{font-family:var(--font-mono);font-size:0.78rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.12em;margin:64px 0 18px;}
+  .folder-stack{display:flex;flex-direction:column;gap:12px;}
+  .folder-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-panel);overflow:hidden;}
+  .folder-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;cursor:pointer;}
+  .folder-head:hover{background:rgba(47,224,196,0.04);}
+  .folder-id-title{display:flex;align-items:center;gap:14px;}
+  .folder-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+  .fi-code{background:rgba(47,224,196,0.14);color:var(--turquoise);}
+  .fi-test{background:rgba(255,111,89,0.14);color:var(--coral);}
+  .fi-agent{background:rgba(255,194,75,0.14);color:var(--warn);}
+  .folder-titles .ft-name{font-family:var(--font-display);font-weight:600;font-size:1.02rem;}
+  .folder-titles .ft-desc{font-size:0.85rem;color:var(--text-muted);margin-top:2px;}
+  .chev{color:var(--text-faint);transition:transform .18s;}
+  .folder-card.open .chev{transform:rotate(180deg);}
+  .folder-body{max-height:0;overflow:hidden;transition:max-height .22s ease;}
+  .folder-card.open .folder-body{max-height:280px;}
+  .folder-body-inner{padding:0 20px 20px 72px;display:flex;gap:10px;flex-wrap:wrap;}
+  .level-copy{font-size:0.88rem;color:var(--text-muted);max-width:520px;}
+  .tagline{margin-top:56px;padding:26px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-family:var(--font-display);font-size:1.15rem;font-weight:600;text-align:center;}
+  .tagline .grad{background:linear-gradient(95deg,var(--turquoise),var(--coral));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  footer.landing-footer{padding:40px 0 70px;text-align:center;color:var(--text-faint);font-size:0.82rem;line-height:1.8;}
+  footer.landing-footer a{color:var(--turquoise);text-decoration:none;}
+  footer.landing-footer a:hover{text-decoration:underline;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(5,10,16,0.82);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .modal-card{width:100%;max-width:460px;background:var(--bg-raised);border:1px solid var(--line);border-radius:14px;padding:30px 28px;}
+  .modal-card h2{font-family:var(--font-display);font-size:1.25rem;margin-bottom:12px;}
+  .modal-card p{color:var(--text-muted);font-size:0.9rem;margin-bottom:10px;}
+  .modal-actions{display:flex;gap:12px;margin-top:22px;}.modal-actions .btn{flex:1;justify-content:center;}
+  .dl-steps{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+  .dl-step{display:flex;align-items:center;gap:10px;font-size:0.85rem;color:var(--text-faint);font-family:var(--font-mono);}
+  .dl-step.active{color:var(--turquoise);}
+  .dl-step .dot{width:7px;height:7px;border-radius:50%;background:var(--text-faint);flex-shrink:0;}
+  .dl-step.active .dot{background:var(--turquoise);}
+  .dl-note{margin-top:16px;font-size:0.78rem;color:var(--text-faint);border-left:2px solid var(--coral);padding-left:10px;}
+  #app-view{min-height:100vh;display:flex;flex-direction:column;}
+  .auth-shell{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .auth-card{width:100%;max-width:380px;background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:32px;}
+  #loginCard{max-width:460px;}
+  .email-settings{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:14px;}
+  .email-settings summary{cursor:pointer;font-size:0.78rem;color:var(--text-muted);user-select:none;}
+  .email-settings[open] summary{margin-bottom:10px;color:var(--turquoise);}
+  .email-settings .field{margin-bottom:10px;}
+  .email-settings .field label{font-size:0.7rem;}
+  .password-wrap{position:relative;}.password-wrap input{padding-right:56px;}
+  .password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text-faint);font-size:0.74rem;font-family:var(--font-mono);padding:4px 8px;cursor:pointer;}
+  .password-toggle:hover{color:var(--turquoise);}
+  .link-btn{background:none;border:none;padding:0;color:var(--turquoise);text-decoration:underline;font-size:inherit;font-family:inherit;cursor:pointer;}
+  .dev-code-box{margin-top:10px;padding:10px 12px;border:1px solid var(--warn);background:rgba(255,194,75,0.08);border-radius:8px;font-size:0.78rem;color:var(--warn);line-height:1.5;}
+  .dev-code-box strong{font-family:var(--font-mono);font-size:1rem;letter-spacing:3px;color:var(--warn);}
+  .auth-card h2{font-family:var(--font-display);font-size:1.3rem;margin-bottom:6px;}
+  .auth-card .sub{font-size:0.85rem;color:var(--text-muted);margin-bottom:22px;}
+  .field{margin-bottom:14px;}.field label{display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:6px;}
+  .role-picker{display:flex;flex-direction:column;gap:10px;}
+  .role-card{display:block;width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--text);font-family:inherit;cursor:pointer;}
+  .role-card:hover{border-color:var(--turquoise);}
+  .role-card.active{border-color:var(--turquoise);background:rgba(47,224,196,0.06);}
+  .role-card .rc-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .role-card .rc-emoji{font-size:1.15rem;}
+  .role-card .rc-title{font-family:var(--font-display);font-weight:600;font-size:0.92rem;}
+  .role-card .rc-tagline{font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;}
+  .role-card ul.rc-features{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:3px;}
+  .role-card ul.rc-features li{font-size:0.74rem;color:var(--text-faint);padding-left:14px;position:relative;}
+  .role-card ul.rc-features li::before{content:'\203A';position:absolute;left:0;color:var(--turquoise);}
+  .field input,.field select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.9rem;}
+  .field input:focus,.field select:focus{border-color:var(--turquoise);}
+  .mfa-code-boxes{display:flex;gap:8px;margin-bottom:8px;}
+  .mfa-code-boxes input{width:42px;height:48px;text-align:center;font-size:1.1rem;font-family:var(--font-mono);border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);}
+  .mfa-hint{font-size:0.76rem;color:var(--text-faint);font-family:var(--font-mono);margin-bottom:16px;}
+  .auth-error{color:var(--danger);font-size:0.82rem;margin-bottom:12px;min-height:1em;}
+  .app-chrome{display:flex;flex:1;min-height:100vh;}
+  .sidebar{width:220px;flex-shrink:0;background:var(--bg-panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:20px 14px;}
+  .sidebar .logo-mark{padding:0 6px 20px;border-bottom:1px solid var(--line);margin-bottom:14px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text-muted);font-size:0.87rem;font-weight:500;margin-bottom:2px;cursor:pointer;}
+  .nav-item:hover{background:rgba(47,224,196,0.06);color:var(--text);}
+  .nav-item.active{background:rgba(47,224,196,0.12);color:var(--turquoise);}
+  .nav-item .badge{margin-left:auto;background:var(--coral);color:#2A0B06;font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:10px;}
+  .nav-divider{height:1px;background:var(--line);margin:12px 0;}
+  .nav-section-label{font-family:var(--font-mono);font-size:0.68rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;padding:6px 12px;}
+  .sidebar-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);}
+  .support-note{margin-top:10px;font-size:0.68rem;color:var(--text-faint);text-align:center;line-height:1.5;}
+  .support-note a{color:var(--turquoise);text-decoration:none;}.support-note a:hover{text-decoration:underline;}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:8px 6px;}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--turquoise),var(--coral));flex-shrink:0;}
+  .user-meta .un{font-size:0.85rem;font-weight:600;}.user-meta .ur{font-size:0.72rem;color:var(--text-faint);text-transform:capitalize;}
+  .main-panel{flex:1;min-width:0;padding:26px 32px;overflow-y:auto;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .panel-head h2{font-family:var(--font-display);font-size:1.4rem;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+  .toolbar input[type=text]{flex:1;min-width:180px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg-panel);color:var(--text);font-size:0.87rem;}
+  .toolbar select{padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-panel);color:var(--text);font-size:0.85rem;}
+  .view-toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .view-toggle button{padding:8px 14px;background:var(--bg-panel);color:var(--text-muted);border:none;font-size:0.82rem;cursor:pointer;}
+  .view-toggle button.active{background:rgba(47,224,196,0.14);color:var(--turquoise);}
+  .card-list{display:flex;flex-direction:column;gap:10px;}
+  .issue-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg-panel);border:1px solid var(--line);border-radius:10px;flex-wrap:wrap;}
+  .issue-main{flex:1;min-width:200px;}.issue-title{font-weight:600;font-size:0.92rem;}
+  .issue-meta{font-size:0.76rem;color:var(--text-faint);margin-top:3px;font-family:var(--font-mono);}
+  .pill{padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;white-space:nowrap;}
+  .pri-Critical{background:rgba(255,111,89,0.18);color:var(--coral);}
+  .pri-High{background:rgba(255,194,75,0.18);color:var(--warn);}
+  .pri-Medium{background:rgba(47,224,196,0.16);color:var(--turquoise);}
+  .pri-Low{background:rgba(131,160,172,0.16);color:var(--text-muted);}
+  .stat-Open{background:rgba(255,111,89,0.14);color:var(--coral);}
+  .stat-InProgress{background:rgba(255,194,75,0.14);color:var(--warn);}
+  .stat-Resolved{background:rgba(47,224,196,0.14);color:var(--turquoise);}
+  select.mini{background:var(--bg);border:1px solid var(--line);color:var(--text);font-size:0.78rem;padding:5px 8px;border-radius:6px;}
+  .empty-state{padding:50px 20px;text-align:center;color:var(--text-faint);font-size:0.9rem;border:1px dashed var(--line);border-radius:10px;}
+  .board-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .board-col{background:var(--bg-panel);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  .board-col h4{font-size:0.8rem;font-family:var(--font-mono);color:var(--text-faint);margin-bottom:10px;text-transform:uppercase;}
+  .board-card{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;font-size:0.82rem;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .cal-cell{min-height:76px;background:var(--bg-panel);border:1px solid var(--line);border-radius:8px;padding:6px;font-size:0.72rem;}
+  .cal-cell .dnum{color:var(--text-faint);font-family:var(--font-mono);}
+  .cal-issue{margin-top:4px;padding:2px 5px;border-radius:4px;font-size:0.66rem;background:rgba(47,224,196,0.16);color:var(--turquoise);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .folder-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg-panel);border:1px solid var(--line);border-radius:9px;margin-bottom:8px;}
+  .folder-row .fname{font-weight:600;font-size:0.88rem;display:flex;align-items:center;gap:8px;}
+  .history-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:0.85rem;}
+  .history-item .ht{color:var(--text-faint);font-family:var(--font-mono);font-size:0.74rem;width:120px;flex-shrink:0;}
+  .notif-item{display:flex;gap:12px;padding:12px 14px;background:var(--bg-panel);border:1px solid var(--line);border-radius:9px;margin-bottom:8px;align-items:flex-start;}
+  .notif-item .dot2{width:8px;height:8px;border-radius:50%;background:var(--turquoise);margin-top:6px;flex-shrink:0;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-panel);border:1px solid var(--line);border-radius:9px;margin-bottom:20px;}
+  .switch{position:relative;width:40px;height:22px;background:var(--line);border-radius:20px;border:none;flex-shrink:0;cursor:pointer;}
+  .switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--text-muted);transition:.15s;}
+  .switch.on{background:rgba(47,224,196,0.35);}.switch.on::after{left:20px;background:var(--turquoise);}
+  .editor-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .editor-tab{padding:7px 14px;border-radius:8px 8px 0 0;border:1px solid var(--line);border-bottom:none;background:var(--bg-panel);color:var(--text-muted);font-size:0.82rem;cursor:pointer;}
+  .editor-tab.active{background:var(--bg);color:var(--turquoise);border-color:var(--turquoise);}
+  .editor-shell{display:flex;gap:16px;align-items:stretch;height:60vh;min-height:380px;}
+  .editor-textarea{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:16px;font-family:var(--font-mono);font-size:0.86rem;line-height:1.6;resize:none;tab-size:2;}
+  .editor-side{width:380px;flex-shrink:0;display:flex;flex-direction:column;}
+  .console-box{flex:1;background:#050B12;border:1px solid var(--line);border-radius:10px;padding:12px;font-family:var(--font-mono);font-size:0.78rem;overflow-y:auto;min-height:120px;}
+  .console-line{padding:3px 0;color:var(--turquoise);border-bottom:1px solid rgba(255,255,255,0.03);}
+  .console-line.console-error{color:var(--coral);}
+  .hw-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.76rem;}
+  .hw-status{color:var(--text-faint);font-family:var(--font-mono);font-size:0.7rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hw-status.live{color:var(--turquoise);}.hw-status.error{color:var(--coral);}
+  .toolbar .menu-item{position:relative;font-size:0.84rem;color:var(--text-muted);cursor:pointer;padding:6px 10px;border-radius:6px;user-select:none;}
+  .toolbar .menu-item:hover{background:rgba(47,224,196,0.06);color:var(--text);}
+  .menu-dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:150px;background:var(--bg-raised);border:1px solid var(--line);border-radius:8px;padding:6px;display:none;flex-direction:column;gap:2px;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+  .menu-dropdown.open{display:flex;}
+  .menu-dropdown button{text-align:left;padding:7px 10px;border-radius:6px;border:none;background:transparent;color:var(--text);font-size:0.82rem;cursor:pointer;}
+  .menu-dropdown button:hover{background:rgba(47,224,196,0.1);color:var(--turquoise);}
+  .side-tabs{display:flex;gap:4px;margin-bottom:8px;border-bottom:1px solid var(--line);}
+  .side-tab{padding:6px 10px;font-size:0.76rem;color:var(--text-faint);border:none;background:transparent;border-bottom:2px solid transparent;cursor:pointer;}
+  .side-tab.active{color:var(--turquoise);border-bottom-color:var(--turquoise);}
+  .side-panel.hidden{display:none;}
+  .plotter-canvas{width:100%;height:160px;background:#050B12;border:1px solid var(--line);border-radius:8px;}
+  .ref-search{width:100%;padding:8px 10px;margin-bottom:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.8rem;}
+  .ref-list{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+  .ref-item{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);}
+  .ref-key{font-family:var(--font-mono);font-size:0.76rem;color:var(--turquoise);margin-bottom:2px;}
+  .ref-desc{font-size:0.72rem;color:var(--text-faint);}
+  @media(max-width:760px){.editor-shell{flex-direction:column;height:auto;}.editor-side{width:100%;}}
+  .lesson-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px;}
+  .lesson-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:10px;padding:14px;}
+  .lesson-card .lt{font-weight:600;font-size:0.9rem;margin-bottom:4px;}
+  .lesson-card .ld{font-size:0.78rem;color:var(--text-muted);}
+  .lesson-tag{display:inline-block;margin-bottom:8px;font-size:0.66rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;color:var(--turquoise);background:rgba(47,224,196,0.12);padding:2px 8px;border-radius:10px;}
+  .role-banner{padding:10px 14px;border:1px solid var(--line);border-left:3px solid var(--turquoise);background:var(--bg-panel);border-radius:8px;font-size:0.82rem;color:var(--text-muted);margin-bottom:20px;}
+  .ai-card{background:var(--bg-panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:24px;}
+  .ai-card h4{font-family:var(--font-display);font-size:0.92rem;margin-bottom:2px;display:flex;align-items:center;gap:8px;}
+  .ai-status{margin-left:auto;font-family:var(--font-mono);font-size:0.66rem;text-transform:uppercase;letter-spacing:0.05em;padding:2px 8px;border-radius:10px;border:1px solid var(--line);color:var(--text-faint);}
+  .ai-status.live{color:var(--turquoise);border-color:var(--turquoise);}
+  .ai-status.offline{color:var(--text-faint);border-color:var(--line);}
+  .ai-card .ai-sub{font-size:0.76rem;color:var(--text-faint);margin-bottom:12px;}
+  .chat-log{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding-right:4px;}
+  .chat-msg{padding:8px 12px;border-radius:8px;font-size:0.83rem;max-width:85%;}
+  .chat-msg.agent{background:rgba(47,224,196,0.1);color:var(--text);align-self:flex-start;}
+  .chat-msg.user{background:rgba(255,111,89,0.14);color:var(--text);align-self:flex-end;}
+  .chat-input-row{display:flex;gap:8px;}
+  .chat-input-row input{flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.85rem;}
+  .hint-note{margin-top:10px;padding:10px 12px;background:rgba(255,194,75,0.08);border:1px solid rgba(255,194,75,0.35);border-radius:8px;font-size:0.8rem;color:var(--warn);}
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--bg-raised);border:1px solid var(--turquoise);color:var(--text);padding:12px 18px;border-radius:9px;font-size:0.85rem;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,0.4);opacity:0;transform:translateY(8px);transition:.2s;}
+  .toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+<svg class="trace-bg" width="100%" height="100%" preserveAspectRatio="none" style="position:fixed;"><defs><linearGradient id="traceGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2FE0C4"/><stop offset="100%" stop-color="#FF6F59"/></linearGradient></defs></svg>
+
+<div class="modal-overlay" id="privacyModal">
+  <div class="modal-card">
+    <h2>Before you start building</h2>
+    <p>Alu-Coding runs code on your machine and, when you connect a board, on your hardware too (e.g. Arduino Uno). We only collect what's needed for authentication, issue history and email updates — never your source code.</p>
+    <p>You can review the full privacy policy any time from Settings.</p>
+    <div class="modal-actions"><button class="btn btn-ghost" id="privacyDecline">Not now</button><button class="btn btn-primary" id="privacyAccept">Accept &amp; continue</button></div>
+  </div>
+</div>
+
+<div id="landing" class="hidden">
+  <div class="wrap">
+    <header class="top">
+      <div class="logo-mark">
+        <svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><path d="M25,50 C25,33 38,25 50,35 C62,45 62,45 74,35 C86,25 99,33 99,50 C99,67 86,75 74,65 C62,55 62,55 50,65 C38,75 25,67 25,50 Z" transform="translate(-12,0)" fill="none" stroke="url(#logoGrad)" stroke-width="9" stroke-linecap="round"/><defs><linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2FE0C4"/><stop offset="100%" stop-color="#FF6F59"/></linearGradient></defs></svg>
+        <div class="name">Alu<span>-</span>Coding</div>
+      </div>
+      <div class="top-actions"><button class="btn btn-ghost" id="goLogin">Log in</button><button class="btn btn-primary" id="goDownload">Download</button></div>
+    </header>
+    <section class="hero">
+      <div class="eyebrow">Code editor &middot; issue tracker &middot; hardware runner</div>
+      <h1 class="hero-title">Write code, ship to <span class="grad">hardware</span>, track every issue in one loop.</h1>
+      <p class="hero-sub">Alu-Coding pairs an editor and Arduino-style hardware runner with a real issue tracker — priorities, calendar view, MFA-secured logins, and full history — built for solo builders and teams alike.</p>
+      <div class="feature-strip">
+        <div class="feature-cell"><div class="fk">ACCESS</div><div class="fv">Role definitions &amp; auth</div></div>
+        <div class="feature-cell"><div class="fk">SECURITY</div><div class="fv">Multi-factor login</div></div>
+        <div class="feature-cell"><div class="fk">TRACKING</div><div class="fv">Priority + status issues</div></div>
+        <div class="feature-cell"><div class="fk">VISIBILITY</div><div class="fv">Search, filter &amp; calendar</div></div>
+        <div class="feature-cell"><div class="fk">UPDATES</div><div class="fv">Email notifications</div></div>
+        <div class="feature-cell"><div class="fk">RECORD</div><div class="fv">Full user history</div></div>
+        <div class="feature-cell"><div class="fk">HARDWARE</div><div class="fv">Arduino Uno &amp; more</div></div>
+        <div class="feature-cell"><div class="fk">GUIDANCE</div><div class="fv">AI agent, any skill level</div></div>
+      </div>
+    </section>
+    <div class="section-label">Start here</div>
+    <div class="folder-stack" id="folderStackLanding">
+      <div class="folder-card" data-folder="student"><div class="folder-head"><div class="folder-id-title"><div class="folder-icon fi-code">&#127891;</div><div class="folder-titles"><div class="ft-name">Student</div><div class="ft-desc">Learning, guided practice, and academic support.</div></div></div><div class="chev">&#9660;</div></div><div class="folder-body"><div class="folder-body-inner"><div class="level-copy">Interactive tutorials with built-in hints, a sandboxed code playground, a visual debugger with plain-language errors, an assignment portal, and an AI tutor that explains concepts instead of just giving answers.</div></div></div></div>
+      <div class="folder-card" data-folder="standard"><div class="folder-head"><div class="folder-id-title"><div class="folder-icon fi-test">&#128100;</div><div class="folder-titles"><div class="ft-name">Standard user</div><div class="ft-desc">For hobbyists, casual creators, and general use.</div></div></div><div class="chev">&#9660;</div></div><div class="folder-body"><div class="folder-body-inner"><div class="level-copy">A multi-language IDE with autocomplete, cloud storage for your projects, simple built-in version history, ready-to-use project templates, and one-click community sharing.</div></div></div></div>
+      <div class="folder-card" data-folder="professional"><div class="folder-head"><div class="folder-id-title"><div class="folder-icon fi-agent">&#128188;</div><div class="folder-titles"><div class="ft-name">Professional</div><div class="ft-desc">Speed, advanced development, and team collaboration.</div></div></div><div class="chev">&#9660;</div></div><div class="folder-body"><div class="folder-body-inner"><div class="level-copy">Real-time, Google Docs-style co-editing, deep terminal access and performance profiling, CI/CD deploys to GitHub/AWS/Vercel, enterprise-grade security, and a Pro AI copilot for generation, refactoring and tests.</div></div></div></div>
+    </div>
+    <div class="tagline"><span class="grad">Laziness cannot bring innovation, so start building.</span></div>
+  </div>
+  <footer class="landing-footer">Alu-Coding — prototype build. No source code ever leaves your machine without your say-so.<br>If you have any issues using the app, contact us at <a href="mailto:forsty6777@gmail.com">forsty6777@gmail.com</a>. Location: No(47/A), KoMin KoChit Road, Yay Tar Shay Ward, near Shwe Gone Daing Skyway, Bahan Township, Yangon.</footer>
+</div>
+
+<div class="modal-overlay hidden" id="downloadModal">
+  <div class="modal-card"><h2>Get Alu-Coding</h2><p>Choose a platform. The desktop app talks to hardware over serial/USB; the web app is editor + tracker only.</p><div class="field"><label>Platform</label><select id="platformSelect"><option>macOS (Apple Silicon)</option><option>Windows 10/11</option><option>Linux (x64)</option></select></div><div class="dl-steps" id="dlSteps"><div class="dl-step" data-step="1"><div class="dot"></div> Preparing installer</div><div class="dl-step" data-step="2"><div class="dot"></div> Verifying signature</div><div class="dl-step" data-step="3"><div class="dot"></div> Ready — open the installer</div></div><div class="dl-note">For your safety, no browser can auto-execute a downloaded file — you'd open the real installer yourself. Since this is a prototype, "Launch" below stands in for opening the installed app.</div><div class="modal-actions"><button class="btn btn-ghost" id="dlClose">Close</button><button class="btn btn-coral" id="dlStart">Simulate download</button><button class="btn btn-primary hidden" id="dlLaunch">Launch Alu-Coding</button></div></div>
+</div>
+
+<div id="app-view" class="hidden">
+  <div id="authScreen" class="auth-shell">
+    <div class="auth-card" id="loginCard">
+      <h2>Log in to Alu-Coding</h2>
+      <div class="sub">Role-based access — what you see depends on your account type.</div>
+      <div class="auth-error" id="loginError"></div>
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="Enter your email address" autocomplete="email"></div>
+      <div class="field"><label>Password</label><div class="password-wrap"><input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password"><button type="button" class="password-toggle" id="passwordToggleBtn">Show</button></div></div>
+      <div class="field"><label>Choose your role</label><div class="role-picker" id="rolePicker">
+        <button type="button" class="role-card" data-role="student"><div class="rc-head"><span class="rc-emoji">&#127891;</span><span class="rc-title">Student</span></div><div class="rc-tagline">Learning, guided practice, and academic support.</div><ul class="rc-features"><li>Interactive tutorials with built-in hints</li><li>Sandboxed code playground</li><li>Visual debugger with plain-language errors</li><li>Assignment portal — import tasks, track deadlines</li><li>AI tutor that explains concepts, not just answers</li></ul></button>
+        <button type="button" class="role-card active" data-role="standard"><div class="rc-head"><span class="rc-emoji">&#128100;</span><span class="rc-title">Standard user</span></div><div class="rc-tagline">For hobbyists, casual creators, and general use.</div><ul class="rc-features"><li>Multi-language IDE with autocomplete</li><li>Cloud storage for your projects</li><li>Simple built-in version history</li><li>Ready-to-use project templates</li><li>One-click community sharing</li></ul></button>
+        <button type="button" class="role-card" data-role="professional"><div class="rc-head"><span class="rc-emoji">&#128188;</span><span class="rc-title">Professional</span></div><div class="rc-tagline">Speed, advanced development, and team collaboration.</div><ul class="rc-features"><li>Real-time, Google Docs-style co-editing</li><li>Deep terminal access &amp; performance profiling</li><li>CI/CD deploys to GitHub, AWS, or Vercel</li><li>2FA, encryption &amp; role-based permissions</li><li>Pro AI copilot for generation &amp; refactoring</li></ul></button>
+      </div></div>
+      <details class="email-settings" id="emailSettings"><summary>&#9881; Configure email delivery (temporary, this browser tab only)</summary><div class="field"><label>EmailJS Service ID</label><input type="text" id="emailjsServiceIdInput" placeholder="service_xxxxxxx"></div><div class="field"><label>EmailJS Template ID</label><input type="text" id="emailjsTemplateIdInput" placeholder="template_xxxxxxx"></div><div class="field" style="margin-bottom:0;"><label>EmailJS Public Key</label><input type="text" id="emailjsPublicKeyInput" placeholder="AbCdEfGhIjKlMnOp"></div><div class="hint-note" style="margin-top:10px;">Get these free at emailjs.com — connect your Gmail, make a template with {{to_email}} and {{passcode}}, then paste the three IDs above.</div></details>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="loginSubmit">Continue</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;" id="backToLanding">&larr; Back</button>
+    </div>
+    <div class="auth-card hidden" id="mfaCard">
+      <h2>Two-step verification</h2><div class="sub">Enter the 6-digit code to finish signing in.</div>
+      <div class="auth-error" id="mfaError"></div>
+      <div class="mfa-code-boxes"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"></div>
+      <div class="mfa-hint" id="mfaHint">Sending your verification code…</div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="mfaSubmit">Verify &amp; sign in</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;" id="mfaBack">&larr; Back</button>
+    </div>
+  </div>
+  <div id="dashboard" class="app-chrome hidden">
+    <aside class="sidebar">
+      <div class="logo-mark"><svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true"><path d="M25,50 C25,33 38,25 50,35 C62,45 62,45 74,35 C86,25 99,33 99,50 C99,67 86,75 74,65 C62,55 62,55 50,65 C38,75 25,67 25,50 Z" transform="translate(-12,0)" fill="none" stroke="url(#logoGrad2)" stroke-width="9" stroke-linecap="round"/><defs><linearGradient id="logoGrad2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2FE0C4"/><stop offset="100%" stop-color="#FF6F59"/></linearGradient></defs></svg><div class="name" style="font-size:1rem;">Alu<span>-</span>Coding</div></div>
+      <div class="nav-item active" data-view="home">&#127968; Home</div>
+      <div class="nav-item" data-view="issues">&#128203; Issues</div>
+      <div class="nav-item" data-view="calendar">&#128197; Calendar</div>
+      <div class="nav-item" data-view="folders">&#128193; Folders</div>
+      <div class="nav-item" data-view="notifications">&#128276; Notifications <span class="badge" id="notifBadge">2</span></div>
+      <div class="nav-item" data-view="history">&#128337; History</div>
+      <div class="sidebar-foot"><div class="user-chip"><div class="user-avatar"></div><div class="user-meta"><div class="un" id="chipEmail">dev@alu-coding.app</div><div class="ur" id="chipRole">user</div></div></div><button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:8px;" id="logoutBtn">Log out</button><div class="support-note">Issues using the app? Contact <a href="mailto:forsty6777@gmail.com">forsty6777@gmail.com</a></div></div>
+    </aside>
+    <main class="main-panel" id="mainPanel"></main>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" async></script>
+<script>
+(function(){
+"use strict";
+var SUPPORTED_BOARDS=[{id:"uno",name:"Arduino Uno",defaultPort:"/dev/ttyUSB0"},{id:"nano",name:"Arduino Nano",defaultPort:"/dev/ttyUSB1"},{id:"mega2560",name:"Arduino Mega 2560",defaultPort:"/dev/ttyUSB0"},{id:"esp32",name:"ESP32 Dev Module",defaultPort:"/dev/ttyUSB2"},{id:"pico",name:"Raspberry Pi Pico",defaultPort:"/dev/ttyACM0"}];
+var MONACO_CDN_BASE="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.55.0/min/vs";
+var EMAILJS_DEFAULT={serviceId:"service_w24joog",templateId:"template_8xj0q4q",publicKey:"oK0lk5eCylPPBMN9h"};
+var emailjsConfiguredByOperator=!!(EMAILJS_DEFAULT.serviceId&&EMAILJS_DEFAULT.templateId&&EMAILJS_DEFAULT.publicKey);
+
+var codeEditorMountEl=null,monacoEditor=null,monacoLoadPromise=null,monacoSuppressChange=false;
+var serialPort=null;
+var serialReader=null,serialReadAbort=false,liveFeedRunning=false;
+var plotterSeries=[];var PLOTTER_MAX_POINTS=100;
+var PLOTTER_COLORS=["#2FE0C4","#FF6F59","#FFC24B","#8AA6FF"];
+
+var state={
+  privacyAccepted:false,loggedIn:false,role:"standard",email:"dev@alu-coding.app",
+  pendingMfaCode:null,view:"home",issueView:"list",search:"",filterPriority:"all",filterStatus:"all",
+  emailUpdates:true,editorFolderId:"f1",selectedBoardId:"uno",compilerApiUrl:"",
+  emailjsServiceId:EMAILJS_DEFAULT.serviceId,emailjsTemplateId:EMAILJS_DEFAULT.templateId,emailjsPublicKey:EMAILJS_DEFAULT.publicKey,
+  loadedHex:null,
+  tutorChat:[{from:"agent",text:"Hi! I'm your learning assistant — ask me anything about these lessons."}],
+  copilotChat:[{from:"agent",text:"AI pair programmer ready — I'll flag anything odd as you type or after you run a build."}],
+  folders:[
+    {id:"f1",name:"LED Blink Sketch",deleted:false,versions:[],code:"void setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(LED_BUILTIN, HIGH);\n  delay(500);\n  digitalWrite(LED_BUILTIN, LOW);\n  delay(500);\n}\n"},
+    {id:"f2",name:"Sensor Dashboard",deleted:false,versions:[],code:"const int sensorPin = A0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int value = analogRead(sensorPin);\n  Serial.println(value);\n  delay(200);\n}\n"},
+    {id:"f3",name:"Motor Control Firmware",deleted:false,versions:[],code:"const int motorPin = 9;\n\nvoid setup() {\n  pinMode(motorPin, OUTPUT);\n}\n\nvoid loop() {\n  analogWrite(motorPin, 180);\n}\n"}
+  ],
+  issues:[
+    {id:"i1",title:"Serial output garbled above 9600 baud",folderId:"f1",priority:"High",status:"Open",due:"2026-08-18",history:[]},
+    {id:"i2",title:"Add debounce to push-button read",folderId:"f1",priority:"Medium",status:"InProgress",due:"2026-08-15",history:[]},
+    {id:"i3",title:"Calibrate temperature sensor offset",folderId:"f2",priority:"Low",status:"Open",due:"2026-08-22",history:[]},
+    {id:"i4",title:"Board not detected on macOS USB-C hub",folderId:"f2",priority:"Critical",status:"Open",due:"2026-08-14",history:[]},
+    {id:"i5",title:"PWM duty cycle drifts under load",folderId:"f3",priority:"High",status:"Resolved",due:"2026-08-10",history:[]},
+    {id:"i6",title:"Document motor driver pinout",folderId:"f3",priority:"Low",status:"InProgress",due:"2026-08-20",history:[]}
+  ],
+  notifications:[
+    {id:"n1",text:"Issue \"Board not detected on macOS USB-C hub\" was marked Critical.",time:"2h ago"},
+    {id:"n2",text:"Weekly digest: 3 issues resolved, 2 opened.",time:"1d ago"}
+  ],
+  activityLog:[
+    {time:"2026-08-13 09:14",text:"Signed in from a new session."},
+    {time:"2026-08-12 17:02",text:"Resolved \"PWM duty cycle drifts under load\"."},
+    {time:"2026-08-11 11:40",text:"Created folder \"Motor Control Firmware\"."}
+  ]
+};
+
+var lessonSets={
+  student:[{title:"Variables & loops",tag:"Beginner",desc:"What a variable is, and how to repeat an action with loop()."},{title:"Reading a sensor",tag:"Beginner",desc:"Read a value from analog pin A0 and print it to Serial."},{title:"Your first if-statement",tag:"Beginner",desc:"Make the LED react to a condition instead of blinking blindly."}],
+  standard:[{title:"Structuring a sketch",tag:"Guide",desc:"Organising setup(), loop(), and helper functions as a project grows."},{title:"Debugging with Serial",tag:"Guide",desc:"Using Serial.print statements effectively to trace a bug."},{title:"Working with folders & issues",tag:"Guide",desc:"How Alu-Coding's folders, priorities and history fit your workflow."}],
+  professional:[{title:"CI for embedded builds",tag:"Professional",desc:"Wiring a compile-and-flash step into a pipeline for firmware."},{title:"Code review checklist",tag:"Professional",desc:"What to check before merging changes to shared firmware."},{title:"Cloud telemetry integration",tag:"Professional",desc:"Streaming sensor data from a board to a cloud dashboard."}]
+};
+
+var selectedLoginRole="standard";
+var hintBank=["Stuck? Check that pinMode() runs in setup() before you read or write that pin.","Tip: delay() pauses everything — for two things happening at once, look into millis() timing later on.","Reminder: analog pins read 0-1023; digital pins only read HIGH or LOW.","If nothing happens on upload, double-check the board and port in the dropdown above."];
+var copilotTips=["No blocking delay() found near your Serial calls — looks fine for a control loop.","Heads up: repeated analogWrite() without ramping can stress a motor driver — consider easing the value up.","This pin is written in setup() but never declared with pinMode() — worth double-checking.","Style note: naming this constant in ALL_CAPS would match common embedded-C convention."];
+var roleBannerText={student:"Student tools unlocked: a Get a hint button while you code, plus a plain-English recap after every Run/Flash.",standard:"Standard workspace: the full coding + tracking toolkit, with no student or professional extras enabled.",professional:"Professional tools unlocked: an AI pair programmer panel, plus an automatic review comment after every Run/Flash."};
+var folderTemplates={blank:{label:"blank sketch",code:"void setup() {\n  \n}\n\nvoid loop() {\n  \n}\n"},blink:{label:"LED blink",code:"void setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(LED_BUILTIN, HIGH);\n  delay(500);\n  digitalWrite(LED_BUILTIN, LOW);\n  delay(500);\n}\n"},sensor:{label:"sensor read",code:"const int sensorPin = A0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int value = analogRead(sensorPin);\n  Serial.println(value);\n  delay(200);\n}\n"},motor:{label:"motor control",code:"const int motorPin = 9;\n\nvoid setup() {\n  pinMode(motorPin, OUTPUT);\n}\n\nvoid loop() {\n  analogWrite(motorPin, 180);\n}\n"}};
+
+var LANGUAGE_REFERENCE=[
+{key:"setup()",desc:"Runs once when the board powers on or resets. Put pinMode() and Serial.begin() here."},
+{key:"loop()",desc:"Runs over and over, forever, right after setup() finishes."},
+{key:"pinMode(pin, mode)",desc:"Configures a pin as INPUT, OUTPUT, or INPUT_PULLUP before you use it."},
+{key:"digitalWrite(pin, value)",desc:"Sets a digital pin HIGH or LOW."},
+{key:"digitalRead(pin)",desc:"Reads whether a digital pin is currently HIGH or LOW. Returns int."},
+{key:"analogRead(pin)",desc:"Reads a voltage on an analog pin (A0-A5). Returns 0-1023."},
+{key:"analogWrite(pin, value)",desc:"Outputs a PWM value (0-255) on pins 3, 5, 6, 9, 10, 11."},
+{key:"analogReference(type)",desc:"Sets the reference voltage for analog input: DEFAULT, INTERNAL, or EXTERNAL."},
+{key:"delay(ms)",desc:"Pauses the program for the given number of milliseconds."},
+{key:"delayMicroseconds(us)",desc:"Pauses for a number of microseconds - use for tight timing."},
+{key:"millis()",desc:"Milliseconds since the board started. Use for non-blocking timing instead of delay()."},
+{key:"micros()",desc:"Microseconds since the board started. Resets after ~70 minutes."},
+{key:"min(a, b)",desc:"Returns the smaller of two values."},
+{key:"max(a, b)",desc:"Returns the larger of two values."},
+{key:"abs(x)",desc:"Returns the absolute value of a number."},
+{key:"constrain(x, a, b)",desc:"Clamps x so it stays between a and b."},
+{key:"map(val, fromLow, fromHigh, toLow, toHigh)",desc:"Re-maps a number from one range to another, e.g. 0-1023 to 0-255."},
+{key:"pow(base, exponent)",desc:"Raises base to the power of exponent. Returns float."},
+{key:"sqrt(x)",desc:"Returns the square root of x."},
+{key:"sq(x)",desc:"Returns x squared (x * x)."},
+{key:"sin(rad)",desc:"Returns the sine of an angle given in radians."},
+{key:"cos(rad)",desc:"Returns the cosine of an angle given in radians."},
+{key:"tan(rad)",desc:"Returns the tangent of an angle given in radians."},
+{key:"random(max)",desc:"Returns a random number between 0 and max-1."},
+{key:"random(min, max)",desc:"Returns a random number between min and max-1."},
+{key:"randomSeed(seed)",desc:"Seeds the random number generator so the sequence isn't the same each boot."},
+{key:"Serial.begin(baud)",desc:"Opens the serial port at the given speed (e.g. 9600, 115200)."},
+{key:"Serial.print(data)",desc:"Sends data to the Serial Monitor without a line break."},
+{key:"Serial.println(data)",desc:"Sends data to the Serial Monitor followed by a newline."},
+{key:"Serial.read()",desc:"Reads one incoming byte. Returns -1 if nothing is available."},
+{key:"Serial.available()",desc:"Returns how many bytes are waiting to be read."},
+{key:"Serial.write(data)",desc:"Sends raw binary data (a byte or array of bytes) to the serial port."},
+{key:"Serial.flush()",desc:"Waits for all outgoing data to finish transmitting."},
+{key:"Serial.end()",desc:"Disables serial communication so the pins can be used for something else."},
+{key:"Serial.peek()",desc:"Reads the next byte without removing it from the buffer."},
+{key:"Serial.parseInt()",desc:"Reads an integer from the serial stream. Blocks until a number is found."},
+{key:"Serial.parseFloat()",desc:"Reads a float from the serial stream."},
+{key:"Serial.readString()",desc:"Reads the entire serial buffer as a String."},
+{key:"Serial.readStringUntil(char)",desc:"Reads serial data until the given character is found."},
+{key:"Serial.setTimeout(ms)",desc:"Sets the maximum time parseInt/parseFloat wait for input."},
+{key:"tone(pin, frequency)",desc:"Generates a square wave of the given frequency on a pin."},
+{key:"tone(pin, frequency, duration)",desc:"Generates a tone for a set duration in milliseconds."},
+{key:"noTone(pin)",desc:"Stops the tone on the given pin."},
+{key:"pulseIn(pin, value)",desc:"Measures the width of a pulse (HIGH or LOW) on a pin. Returns microseconds."},
+{key:"pulseIn(pin, value, timeout)",desc:"Same as pulseIn but with a timeout so it doesn't block forever."},
+{key:"shiftIn(dataPin, clockPin, bitOrder)",desc:"Shifts in a byte of data one bit at a time. Returns a byte."},
+{key:"shiftOut(dataPin, clockPin, bitOrder, value)",desc:"Shifts out a byte of data one bit at a time."},
+{key:"attachInterrupt(pin, ISR, mode)",desc:"Runs a function (ISR) when an event happens on a pin. Mode: RISING, FALLING, or CHANGE."},
+{key:"detachInterrupt(pin)",desc:"Disables the interrupt on the given pin."},
+{key:"interrupts()",desc:"Re-enables interrupts after they were disabled with noInterrupts()."},
+{key:"noInterrupts()",desc:"Temporarily disables all interrupts for timing-critical code."},
+{key:"lowByte(x)",desc:"Extracts the least significant (lowest) byte of a 16-bit value."},
+{key:"highByte(x)",desc:"Extracts the most significant (highest) byte of a 16-bit value."},
+{key:"bitRead(x, n)",desc:"Reads bit n of a number (0 or 1)."},
+{key:"bitWrite(x, n, b)",desc:"Writes value b (0 or 1) into bit n of a number."},
+{key:"bitSet(x, n)",desc:"Sets bit n of x to 1."},
+{key:"bitClear(x, n)",desc:"Sets bit n of x to 0."},
+{key:"bit(n)",desc:"Returns the value of bit n (e.g. bit(3) = 8)."},
+{key:"isAlpha(c)",desc:"Returns true if c is a letter (a-z, A-Z)."},
+{key:"isDigit(c)",desc:"Returns true if c is a digit (0-9)."},
+{key:"isAlphaNumeric(c)",desc:"Returns true if c is a letter or digit."},
+{key:"isWhitespace(c)",desc:"Returns true if c is a space, tab, or newline."},
+{key:"isLowerCase(c)",desc:"Returns true if c is a lowercase letter."},
+{key:"isUpperCase(c)",desc:"Returns true if c is an uppercase letter."},
+{key:"toLowerCase(c)",desc:"Converts c to lowercase."},
+{key:"toUpperCase(c)",desc:"Converts c to uppercase."},
+{key:"int",desc:"16-bit signed integer on AVR boards (-32768 to 32767), 32-bit on ESP."},
+{key:"long",desc:"32-bit signed integer (-2147483648 to 2147483647)."},
+{key:"float",desc:"32-bit floating point number (about 7 significant digits)."},
+{key:"double",desc:"On AVR, same as float (32-bit). On ESP32, 64-bit."},
+{key:"char",desc:"A single character, stored as 1 byte (-128 to 127)."},
+{key:"byte",desc:"An unsigned 8-bit number (0 to 255)."},
+{key:"boolean",desc:"Stores true or false. Takes 1 byte."},
+{key:"word",desc:"An unsigned 16-bit number (0 to 65535)."},
+{key:"String",desc:"A class for text strings. More memory than char arrays but easier to use."},
+{key:"void",desc:"Used in function declarations when the function returns no value."},
+{key:"unsigned int",desc:"Same as int but only positive (0 to 65535 on AVR)."},
+{key:"unsigned long",desc:"32-bit unsigned number (0 to 4294967295). Used by millis()."},
+{key:"uint8_t",desc:"Exactly 8 bits unsigned, regardless of board. Always 0-255."},
+{key:"uint16_t",desc:"Exactly 16 bits unsigned, regardless of board."},
+{key:"uint32_t",desc:"Exactly 32 bits unsigned, regardless of board."},
+{key:"size_t",desc:"An unsigned integer type used for sizes and counts."},
+{key:"if (condition)",desc:"Runs a block of code only when the condition is true."},
+{key:"if ... else",desc:"Runs one block if condition is true, another if false."},
+{key:"else if",desc:"Chains multiple conditions together."},
+{key:"for (init; test; step)",desc:"Repeats a block a fixed number of times. e.g. for(int i=0; i<10; i++)"},
+{key:"while (condition)",desc:"Repeats a block as long as the condition stays true."},
+{key:"do ... while (condition)",desc:"Like while, but always runs at least once before checking."},
+{key:"switch (var)",desc:"Chooses one of several code paths based on a value."},
+{key:"case value:",desc:"A branch inside a switch statement."},
+{key:"default:",desc:"The fallback branch in a switch when no case matched."},
+{key:"break;",desc:"Exits the nearest for/while/switch immediately."},
+{key:"continue;",desc:"Skips the rest of this loop iteration and goes to the next."},
+{key:"return value;",desc:"Exits a function and sends a value back to the caller."},
+{key:"= (assignment)",desc:"Assigns a value to a variable: x = 5;"},
+{key:"+ - * / (arithmetic)",desc:"Add, subtract, multiply, divide."},
+{key:"% (modulo)",desc:"Returns the remainder of division: 7 % 3 = 1."},
+{key:"== (equal)",desc:"Tests if two values are equal. Returns true or false."},
+{key:"!= (not equal)",desc:"Tests if two values are different."},
+{key:"< > <= >=",desc:"Less than, greater than, less than or equal, greater than or equal."},
+{key:"&& (logical AND)",desc:"True only if both conditions are true."},
+{key:"|| (logical OR)",desc:"True if at least one condition is true."},
+{key:"! (logical NOT)",desc:"Inverts true/false."},
+{key:"& | ^ (bitwise)",desc:"Bitwise AND, OR, XOR - operates on individual bits."},
+{key:"~ (bitwise NOT)",desc:"Inverts all bits of a number."},
+{key:"<< (left shift)",desc:"Shifts all bits left by n positions. Same as multiplying by 2^n."},
+{key:">> (right shift)",desc:"Shifts all bits right by n positions. Same as dividing by 2^n."},
+{key:"++ (increment)",desc:"Adds 1 to a variable: i++ or ++i."},
+{key:"-- (decrement)",desc:"Subtracts 1 from a variable: i-- or --i."},
+{key:"+= -= *= /=",desc:"Compound assignment: x += 5 means x = x + 5."},
+{key:"HIGH",desc:"A digital logic level of 5V (or 3.3V on some boards)."},
+{key:"LOW",desc:"A digital logic level of 0V (ground)."},
+{key:"INPUT",desc:"Pin mode for reading: high-impedance, no pullup."},
+{key:"OUTPUT",desc:"Pin mode for driving: can source or sink up to 40 mA."},
+{key:"INPUT_PULLUP",desc:"Pin mode for reading with the internal pull-up resistor enabled."},
+{key:"LED_BUILTIN",desc:"The pin connected to the on-board LED (13 on Uno)."},
+{key:"true",desc:"A boolean value meaning 1 / on / yes."},
+{key:"false",desc:"A boolean value meaning 0 / off / no."},
+{key:"PI",desc:"The constant pi approximately 3.141592653589793."},
+{key:"HALF_PI",desc:"pi/2 approximately 1.5707963267948966."},
+{key:"TWO_PI",desc:"2*pi approximately 6.283185307179586."},
+{key:"LSBFIRST",desc:"Shift order: least significant bit first."},
+{key:"MSBFIRST",desc:"Shift order: most significant bit first."},
+{key:"RISING",desc:"Interrupt trigger: fires when the pin goes LOW to HIGH."},
+{key:"FALLING",desc:"Interrupt trigger: fires when the pin goes HIGH to LOW."},
+{key:"CHANGE",desc:"Interrupt trigger: fires on any edge (rising or falling)."},
+{key:"DEFAULT",desc:"Analog reference: the board's default voltage (5V or 3.3V)."},
+{key:"INTERNAL",desc:"Analog reference: uses the internal 1.1V reference (Uno) or 2.56V (Mega)."},
+{key:"EXTERNAL",desc:"Analog reference: uses the voltage on the AREF pin."},
+{key:"#define NAME value",desc:"Creates a compile-time constant (no memory cost): #define LED_PIN 13"},
+{key:"#include <library.h>",desc:"Includes a library so its functions are available: #include <Servo.h>"},
+{key:"#ifdef NAME",desc:"Compile the following code only if NAME is #defined."},
+{key:"#ifndef NAME",desc:"Compile only if NAME is NOT #defined - used for include guards."},
+{key:"#endif",desc:"Ends an #ifdef / #ifndef block."},
+{key:"#if condition",desc:"Compile only if a numeric condition is non-zero."},
+{key:"#else",desc:"The else branch for #ifdef / #if."},
+{key:"String.charAt(index)",desc:"Returns the character at the given position."},
+{key:"String.length()",desc:"Returns the number of characters in the string."},
+{key:"String.indexOf(str)",desc:"Returns the position of str inside the string, or -1 if not found."},
+{key:"String.substring(from, to)",desc:"Returns a portion of the string."},
+{key:"String.concat(other)",desc:"Appends another string to the end."},
+{key:"String.equals(other)",desc:"Returns true if both strings have identical content."},
+{key:"String.toInt()",desc:"Converts the string to an integer."},
+{key:"String.toFloat()",desc:"Converts the string to a float."},
+{key:"String.toUpperCase()",desc:"Converts all characters to uppercase in place."},
+{key:"String.toLowerCase()",desc:"Converts all characters to lowercase in place."},
+{key:"String.trim()",desc:"Removes leading and trailing whitespace."},
+{key:"const",desc:"Marks a variable as read-only - it can't be changed after initialization."},
+{key:"static",desc:"A variable that keeps its value between function calls instead of resetting."},
+{key:"sizeof(var)",desc:"Returns the number of bytes a variable or type occupies."},
+{key:"struct",desc:"Defines a custom data type with multiple named fields."},
+{key:"enum",desc:"Defines a set of named integer constants."},
+{key:"array",desc:"A collection of values accessed by index: int arr[5] = {0,1,2,3,4};"},
+{key:"pointer (*)",desc:"Holds a memory address. *p dereferences it, &x gets an address."},
+{key:"Serial1 / Serial2 / Serial3",desc:"Additional hardware serial ports on boards like the Mega."},
+{key:"EEPROM.read(addr)",desc:"Reads one byte from non-volatile EEPROM storage."},
+{key:"EEPROM.write(addr, val)",desc:"Writes one byte to EEPROM. Survives power off. ~100k writes max."},
+{key:"Wire.begin()",desc:"Joins the I2C bus as a master so you can talk to sensors."},
+{key:"Wire.requestFrom(addr, n)",desc:"Requests n bytes from an I2C device at the given address."},
+{key:"Wire.beginTransmission(addr)",desc:"Starts an I2C transmission to a device."},
+{key:"Wire.write(data)",desc:"Sends data within an I2C transmission."},
+{key:"Wire.endTransmission()",desc:"Ends the I2C transmission and actually sends the data."},
+{key:"SPI.begin()",desc:"Initializes the SPI bus for communication with SPI peripherals."},
+{key:"SPI.transfer(data)",desc:"Sends and receives one byte simultaneously over SPI."}
+];
+
+function byId(id){return document.getElementById(id);}
+function qsa(sel,root){return Array.prototype.slice.call((root||document).querySelectorAll(sel));}
+function toast(msg){var t=byId("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._h);toast._h=setTimeout(function(){t.classList.remove("show");},2200);}
+function logActivity(text){state.activityLog.unshift({time:new Date().toISOString().slice(0,16).replace("T"," "),text:text});}
+function addNotification(text){state.notifications.unshift({id:"n"+Date.now()+Math.floor(Math.random()*1000),text:text,time:"just now"});updateNotifBadge();if(state.view==="notifications")render();}
+function updateNotifBadge(){var el=byId("notifBadge");if(el)el.textContent=state.notifications.length;}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+
+function ensureMonacoLoaded(){
+  if(monacoLoadPromise)return monacoLoadPromise;
+  monacoLoadPromise=new Promise(function(resolve,reject){
+    if(window.monaco){resolve();return;}
+    var ls=document.createElement("script");ls.src=MONACO_CDN_BASE+"/loader.js";
+    ls.onload=function(){try{window.require.config({paths:{vs:MONACO_CDN_BASE}});window.require(["vs/editor/editor.main"],function(){resolve();},function(err){reject(err);});}catch(err){reject(err);}};
+    ls.onerror=function(){reject(new Error("couldn't reach cdnjs.cloudflare.com - check your internet connection"));};
+    document.head.appendChild(ls);
+  });
+  return monacoLoadPromise;
+}
+function getOrCreateEditorMount(){if(!codeEditorMountEl){codeEditorMountEl=document.createElement("div");codeEditorMountEl.id="codeEditorMount";codeEditorMountEl.style.width="100%";codeEditorMountEl.style.height="100%";}return codeEditorMountEl;}
+function runMonacoAction(actionId){if(!monacoEditor)return;var idMap={undo:"undo",redo:"redo",cut:"editor.action.clipboardCutAction",copy:"editor.action.clipboardCopyAction",paste:"editor.action.clipboardPasteAction",selectAll:"editor.action.selectAll",find:"actions.find"};var m=idMap[actionId];if(!m)return;var a=monacoEditor.getAction(m);if(a)a.run();monacoEditor.focus();}
+
+function parseIntelHex(hexText){
+  var lines=String(hexText).split(/\r?\n/).map(function(l){return l.trim();}).filter(Boolean);
+  var records=[],bytesOut=[],extAddr=0;
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i];if(line.charAt(0)!==":")throw new Error("line "+(i+1)+": doesn't start with ':'");
+    var bc=parseInt(line.substr(1,2),16),addr=parseInt(line.substr(3,4),16),rt=parseInt(line.substr(7,2),16);
+    var ds=line.substr(9,bc*2),cs=line.substr(9+bc*2,2);
+    if(isNaN(bc)||isNaN(addr)||isNaN(rt)||ds.length!==bc*2||cs.length!==2)throw new Error("line "+(i+1)+": malformed record");
+    var data=[];for(var b=0;b<bc;b++){data.push(parseInt(ds.substr(b*2,2),16));}
+    var sum=bc+((addr>>8)&0xFF)+(addr&0xFF)+rt;for(var k=0;k<data.length;k++){sum+=data[k];}
+    var cc=(0x100-(sum&0xFF))&0xFF;var gc=parseInt(cs,16);
+    if(cc!==gc)throw new Error("line "+(i+1)+": checksum mismatch");
+    if(rt===0x00){var fa=extAddr+addr;records.push({address:fa,data:data});for(var d=0;d<data.length;d++){bytesOut.push(data[d]);}}
+    else if(rt===0x01){break;}
+    else if(rt===0x04){extAddr=((data[0]<<8)|data[1])<<16;}
+    else if(rt===0x02){extAddr=((data[0]<<8)|data[1])<<4;}
+  }
+  return{records:records,bytes:bytesOut,byteLength:bytesOut.length};
+}
+
+function isWebSerialSupported(){return typeof navigator!=="undefined"&&"serial"in navigator;}
+function connectSerial(){if(!isWebSerialSupported())return Promise.reject(new Error("Web Serial isn't supported in this browser (use desktop Chrome or Edge)"));return navigator.serial.requestPort().then(function(p){return p.open({baudRate:115200}).then(function(){serialPort=p;return p;});});}
+function sendBytesOverSerial(bytes){if(!serialPort||!serialPort.writable)return Promise.reject(new Error("no open serial connection"));var w=serialPort.writable.getWriter();return w.write(new Uint8Array(bytes)).then(function(){w.releaseLock();});}
+
+function startSerialReadLoop(onLine){
+  if(!serialPort||!serialPort.readable)return Promise.reject(new Error('no open serial connection - click "Connect board" first'));
+  serialReadAbort=false;var dec=new TextDecoder(),buf="";
+  serialReader=serialPort.readable.getReader();
+  function pump(){if(serialReadAbort)return;serialReader.read().then(function(res){if(res.done||serialReadAbort)return;buf+=dec.decode(res.value,{stream:true});var parts=buf.split(/\r?\n/);buf=parts.pop();parts.forEach(function(line){if(line.length)onLine(line);});pump();}).catch(function(err){if(!serialReadAbort)console.log("[Alu-Coding] serial read loop stopped: "+err.message);});}
+  pump();return Promise.resolve();
+}
+function stopSerialReadLoop(){serialReadAbort=true;if(serialReader){try{serialReader.cancel();}catch(e){}try{serialReader.releaseLock();}catch(e){}serialReader=null;}}
+function startLiveFeed(){if(liveFeedRunning)return Promise.resolve();return startSerialReadLoop(function(line){var box=byId("serialMonitorBox");if(box){var d=document.createElement("div");d.className="console-line";d.textContent=line;box.appendChild(d);box.scrollTop=box.scrollHeight;}feedPlotterLine(line);}).then(function(){liveFeedRunning=true;});}
+function stopLiveFeed(){stopSerialReadLoop();liveFeedRunning=false;}
+
+function feedPlotterLine(line){var nums=line.split(/[,\s]+/).map(parseFloat).filter(function(n){return!isNaN(n);});if(nums.length===0)return;nums.forEach(function(n,i){if(!plotterSeries[i])plotterSeries[i]=[];plotterSeries[i].push(n);if(plotterSeries[i].length>PLOTTER_MAX_POINTS)plotterSeries[i].shift();});drawPlotter();}
+function drawPlotter(){var canvas=byId("plotterCanvas");if(!canvas)return;var ctx=canvas.getContext("2d");var w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle="rgba(255,255,255,0.08)";ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();var av=[];plotterSeries.forEach(function(s){av=av.concat(s);});if(av.length===0)return;var mn=Math.min.apply(null,av),mx=Math.max.apply(null,av);if(mn===mx){mn-=1;mx+=1;}plotterSeries.forEach(function(s,si){ctx.strokeStyle=PLOTTER_COLORS[si%PLOTTER_COLORS.length];ctx.lineWidth=1.5;ctx.beginPath();s.forEach(function(v,i){var x=(i/(PLOTTER_MAX_POINTS-1))*w;var y=h-((v-mn)/(mx-mn))*h;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();});}
+
+function sendMfaCodeByEmail(toEmail,code){
+  if(!state.emailjsServiceId||!state.emailjsTemplateId||!state.emailjsPublicKey){
+    return Promise.reject(new Error("no email service configured"));
+  }
+  if(window.emailjs){
+    return window.emailjs.send(state.emailjsServiceId,state.emailjsTemplateId,{to_email:toEmail,passcode:code,from_name:"Alu-Coding"}).then(function(r){console.log("[Alu-Coding] EmailJS success:",r.status);},function(err){console.error("[Alu-Coding] EmailJS error:",err);var msg=(err&&err.text)?err.text:(err&&err.message)?err.message:"EmailJS send failed";throw new Error(msg);});
+  }
+  return fetch("https://api.emailjs.com/api/v1.0/email/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:state.emailjsServiceId,template_id:state.emailjsTemplateId,user_id:state.emailjsPublicKey,template_params:{to_email:toEmail,passcode:code}})}).then(function(res){if(!res.ok)throw new Error("EmailJS returned HTTP "+res.status);});
+}
+
+function compileViaApi(code,boardId){
+  if(!state.compilerApiUrl)return Promise.reject(new Error("no compiler API configured"));
+  return fetch(state.compilerApiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,board:boardId})}).then(function(res){if(!res.ok)throw new Error("compiler API returned HTTP "+res.status);return res.json();}).then(function(result){if(!result||!result.success||!result.hex)throw new Error((result&&result.error)||"compiler API returned no hex output");return result.hex;});
+}
+
+byId("privacyAccept").addEventListener("click",function(){state.privacyAccepted=true;byId("privacyModal").classList.add("hidden");byId("landing").classList.remove("hidden");});
+byId("privacyDecline").addEventListener("click",function(){state.privacyAccepted=false;byId("privacyModal").classList.add("hidden");byId("landing").classList.remove("hidden");byId("goLogin").disabled=true;byId("goDownload").disabled=true;toast("You can accept the privacy policy any time from the top bar to unlock login & download.");});
+qsa(".folder-head").forEach(function(h){h.addEventListener("click",function(){h.parentElement.classList.toggle("open");});});
+
+document.addEventListener("click",function(e){var dd=document.getElementById("editMenuDropdown");if(dd&&!e.target.closest("#editMenuBtn"))dd.classList.remove("open");});
+if(emailjsConfiguredByOperator){var es=byId("emailSettings");if(es)es.classList.add("hidden");}
+
+function isMobileDevice(){return/Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);}
+if(isMobileDevice())byId("goDownload").title="Alu-Coding is a laptop/desktop app - open this page on a laptop or desktop to download it.";
+byId("goDownload").addEventListener("click",function(){if(!state.privacyAccepted){toast("Please accept the privacy policy first.");return;}if(isMobileDevice()){toast("Alu-Coding is a laptop/desktop app - open this page on a laptop or desktop computer to download it.");return;}byId("downloadModal").classList.remove("hidden");qsa(".dl-step").forEach(function(s){s.classList.remove("active");});});
+byId("dlClose").addEventListener("click",function(){byId("downloadModal").classList.add("hidden");});
+byId("dlStart").addEventListener("click",function(){var steps=qsa(".dl-step");var i=0;byId("dlLaunch").classList.add("hidden");byId("dlStart").disabled=true;steps.forEach(function(s){s.classList.remove("active");});var iv=setInterval(function(){if(i>0)steps[i-1].classList.remove("active");if(i<steps.length){steps[i].classList.add("active");i++;}else{clearInterval(iv);byId("dlStart").disabled=false;byId("dlLaunch").classList.remove("hidden");toast("Installed - click Launch to open Alu-Coding.");}},550);});
+byId("dlLaunch").addEventListener("click",function(){if(!state.privacyAccepted){toast("Please accept the privacy policy first.");return;}byId("downloadModal").classList.add("hidden");byId("landing").classList.add("hidden");byId("app-view").classList.remove("hidden");byId("authScreen").classList.remove("hidden");byId("dashboard").classList.add("hidden");byId("loginCard").classList.remove("hidden");byId("mfaCard").classList.add("hidden");});
+
+byId("goLogin").addEventListener("click",function(){if(!state.privacyAccepted){toast("Please accept the privacy policy first.");return;}byId("landing").classList.add("hidden");byId("app-view").classList.remove("hidden");byId("authScreen").classList.remove("hidden");byId("dashboard").classList.add("hidden");byId("loginCard").classList.remove("hidden");byId("mfaCard").classList.add("hidden");});
+byId("backToLanding").addEventListener("click",function(){byId("app-view").classList.add("hidden");byId("landing").classList.remove("hidden");});
+qsa(".role-card").forEach(function(c){c.addEventListener("click",function(){selectedLoginRole=c.dataset.role;qsa(".role-card").forEach(function(x){x.classList.remove("active");});c.classList.add("active");});});
+byId("emailjsServiceIdInput").addEventListener("input",function(e){state.emailjsServiceId=e.target.value.trim();});
+byId("emailjsTemplateIdInput").addEventListener("input",function(e){state.emailjsTemplateId=e.target.value.trim();});
+byId("emailjsPublicKeyInput").addEventListener("input",function(e){state.emailjsPublicKey=e.target.value.trim();});
+byId("passwordToggleBtn").addEventListener("click",function(){var i=byId("loginPassword");var b=byId("passwordToggleBtn");if(i.type==="password"){i.type="text";b.textContent="Hide";}else{i.type="password";b.textContent="Show";}});
+byId("mfaBack").addEventListener("click",function(){byId("mfaCard").classList.add("hidden");byId("loginCard").classList.remove("hidden");});
+
+byId("loginSubmit").addEventListener("click",function(){
+  var email=byId("loginEmail").value.trim(),pw=byId("loginPassword").value,err=byId("loginError");
+  err.textContent="";if(!email||!pw){err.textContent="Enter both an email and a password.";return;}
+  state.email=email;state.role=selectedLoginRole;
+  state.pendingMfaCode=String(Math.floor(100000+Math.random()*900000));
+  byId("loginCard").classList.add("hidden");byId("mfaCard").classList.remove("hidden");
+  byId("mfaHint").textContent="Sending your verification code...";
+  qsa(".mfa-box").forEach(function(b){b.value="";});qsa(".mfa-box")[0].focus();
+  sendMfaCodeByEmail(email,state.pendingMfaCode).then(function(){
+    byId("mfaHint").textContent="We've emailed a 6-digit code to "+email+". Didn't get it? Check spam, or go back and re-check your email settings.";
+  }).catch(function(reason){
+    var why=reason.message==="no email service configured"?"email delivery isn't configured yet.":"the email service returned an error ("+escapeHtml(reason.message)+").";
+    byId("mfaHint").innerHTML="No email was actually sent - "+why+' Go <button type="button" class="link-btn" id="mfaGoConfigureEmail">back</button> and fill in "Configure email delivery" for real delivery.<div class="dev-code-box">No email service is set up, so here is the code so you can still test logging in: <strong>'+state.pendingMfaCode+'</strong></div>';
+    var lb=byId("mfaGoConfigureEmail");if(lb)lb.addEventListener("click",function(){byId("mfaCard").classList.add("hidden");byId("loginCard").classList.remove("hidden");var es=byId("emailSettings");es.classList.remove("hidden");es.setAttribute("open","");});
+  });
+});
+
+qsa(".mfa-box").forEach(function(b,idx,arr){b.addEventListener("input",function(){b.value=b.value.replace(/[^0-9]/g,"").slice(0,1);if(b.value&&arr[idx+1])arr[idx+1].focus();});b.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!b.value&&arr[idx-1])arr[idx-1].focus();});});
+byId("mfaSubmit").addEventListener("click",function(){var en=qsa(".mfa-box").map(function(b){return b.value;}).join(""),err=byId("mfaError");if(en.length<6){err.textContent="Enter all 6 digits.";return;}if(en!==state.pendingMfaCode){err.textContent="That code doesn't match. Try again.";return;}err.textContent="";state.loggedIn=true;logActivity("Signed in with MFA as "+state.role+".");enterDashboard();});
+
+function roleLabel(r){return{student:"Student",standard:"Standard user",professional:"Professional"}[r]||r;}
+function enterDashboard(){byId("authScreen").classList.add("hidden");byId("dashboard").classList.remove("hidden");byId("chipEmail").textContent=state.email;byId("chipRole").textContent=roleLabel(state.role);state.view="home";qsa(".nav-item[data-view]").forEach(function(i){i.classList.remove("active");});var hn=document.querySelector('.nav-item[data-view="home"]');if(hn)hn.classList.add("active");updateNotifBadge();render();}
+byId("logoutBtn").addEventListener("click",function(){state.loggedIn=false;byId("dashboard").classList.add("hidden");byId("app-view").classList.add("hidden");byId("landing").classList.remove("hidden");toast("Signed out.");});
+qsa(".nav-item[data-view]").forEach(function(item){item.addEventListener("click",function(){state.view=item.dataset.view;qsa(".nav-item[data-view]").forEach(function(i){i.classList.remove("active");});item.classList.add("active");render();});});
+
+function activeFolders(){return state.folders.filter(function(f){return!f.deleted;});}
+function folderName(id){var f=state.folders.find(function(x){return x.id===id;});return(f&&!f.deleted)?f.name:null;}
+function visibleIssues(){var aids=activeFolders().map(function(f){return f.id;});return state.issues.filter(function(iss){if(aids.indexOf(iss.folderId)===-1)return false;if(state.search&&iss.title.toLowerCase().indexOf(state.search.toLowerCase())===-1)return false;if(state.filterPriority!=="all"&&iss.priority!==state.filterPriority)return false;if(state.filterStatus!=="all"&&iss.status!==state.filterStatus)return false;return true;});}
+
+function render(){var p=byId("mainPanel");if(state.view==="home")return renderHome(p);if(state.view==="issues")return renderIssues(p);if(state.view==="calendar")return renderCalendar(p);if(state.view==="folders")return renderFolders(p);if(state.view==="notifications")return renderNotifications(p);if(state.view==="history")return renderHistory(p);}
+
+function renderIssues(p){
+  var list=visibleIssues();
+  p.innerHTML='<div class="panel-head"><h2>Issues</h2><div class="view-toggle"><button data-iv="list" class="'+(state.issueView==="list"?"active":"")+'">List</button><button data-iv="board" class="'+(state.issueView==="board"?"active":"")+'">Board</button></div></div><div class="toolbar"><input type="text" id="searchInput" placeholder="Search issues by title..." value="'+escapeHtml(state.search)+'"><select id="priFilter"><option value="all">All priorities</option>'+["Critical","High","Medium","Low"].map(function(pr){return'<option value="'+pr+'" '+(state.filterPriority===pr?"selected":"")+'>'+pr+'</option>';}).join("")+'</select><select id="statFilter"><option value="all">All statuses</option>'+[["Open","Open"],["InProgress","In progress"],["Resolved","Resolved"]].map(function(pr){return'<option value="'+pr[0]+'" '+(state.filterStatus===pr[0]?"selected":"")+'>'+pr[1]+'</option>';}).join("")+'</select><button class="btn btn-sm" id="refreshBtn">&#8635; Refresh</button></div>'+(state.issueView==="list"?renderIssueListHtml(list):renderIssueBoardHtml(list));
+  byId("searchInput").addEventListener("input",function(e){state.search=e.target.value;render();var el=byId("searchInput");if(el){el.focus();var v=el.value;el.value="";el.value=v;}});
+  byId("priFilter").addEventListener("change",function(e){state.filterPriority=e.target.value;render();});
+  byId("statFilter").addEventListener("change",function(e){state.filterStatus=e.target.value;render();});
+  byId("refreshBtn").addEventListener("click",function(){render();toast("Issue list refreshed.");});
+  qsa(".view-toggle button").forEach(function(b){b.addEventListener("click",function(){state.issueView=b.dataset.iv;render();});});
+  qsa("select.mini[data-issue]").forEach(function(sel){sel.addEventListener("change",function(){var iss=state.issues.find(function(x){return x.id===sel.dataset.issue;});var f=sel.dataset.field;var old=iss[f];iss[f]=sel.value;logActivity('Updated "'+iss.title+'" '+f+' from '+old+' to '+sel.value+".");addNotification('Issue "'+iss.title+'" '+f+' changed to '+sel.value+'.');render();toast("Saved - list refreshed.");});});
+}
+
+function renderIssueListHtml(list){if(list.length===0)return'<div class="empty-state">No issues match your search and filters.</div>';return'<div class="card-list">'+list.map(function(iss){var fn=folderName(iss.folderId)||"(folder removed)";return'<div class="issue-card"><div class="issue-main"><div class="issue-title">'+escapeHtml(iss.title)+'</div><div class="issue-meta">'+escapeHtml(fn)+' &middot; due '+iss.due+'</div></div><select class="mini" data-issue="'+iss.id+'" data-field="priority">'+["Critical","High","Medium","Low"].map(function(p){return'<option value="'+p+'" '+(iss.priority===p?"selected":"")+'>'+p+'</option>';}).join("")+'</select><select class="mini" data-issue="'+iss.id+'" data-field="status">'+[["Open","Open"],["InProgress","In progress"],["Resolved","Resolved"]].map(function(p){return'<option value="'+p[0]+'" '+(iss.status===p[0]?"selected":"")+'>'+p[1]+'</option>';}).join("")+'</select><span class="pill pri-'+iss.priority+'">'+iss.priority+'</span><span class="pill stat-'+iss.status+'">'+(iss.status==="InProgress"?"In progress":iss.status)+'</span></div>';}).join("")+'</div>';}
+function renderIssueBoardHtml(list){var cols=["Open","InProgress","Resolved"];var labels={Open:"Open",InProgress:"In progress",Resolved:"Resolved"};return'<div class="board-cols">'+cols.map(function(c){var items=list.filter(function(i){return i.status===c;});return'<div class="board-col"><h4>'+labels[c]+' ('+items.length+')</h4>'+items.map(function(i){return'<div class="board-card">'+escapeHtml(i.title)+'<div style="margin-top:6px;"><span class="pill pri-'+i.priority+'">'+i.priority+'</span></div></div>';}).join("")+'</div>';}).join("")+'</div>';}
+function renderCalendar(p){var list=visibleIssues();p.innerHTML='<div class="panel-head"><h2>Calendar view</h2></div><div class="cal-grid">'+Array.from({length:31},function(_,d){d=d+1;var ds="2026-08-"+String(d).padStart(2,"0");var di=list.filter(function(i){return i.due===ds;});return'<div class="cal-cell"><div class="dnum">'+d+'</div>'+di.map(function(i){return'<div class="cal-issue" title="'+escapeHtml(i.title)+'">'+escapeHtml(i.title)+'</div>';}).join("")+'</div>';}).join("")+'</div>';}
+
+function renderFolders(p){
+  var list=activeFolders();
+  p.innerHTML='<div class="panel-head"><h2>Folders</h2><button class="btn btn-sm btn-primary" id="newFolderBtn">+ New folder</button></div>'+(list.length===0?'<div class="empty-state">No folders yet.</div>':list.map(function(f){var c=state.issues.filter(function(i){return i.folderId===f.id;}).length;return'<div class="folder-row"><div class="fname">&#128193; '+escapeHtml(f.name)+'<span style="color:var(--text-faint);font-weight:400;font-size:0.78rem;">('+c+' issues)</span></div><div style="display:flex;gap:8px;"><button class="btn btn-sm" data-open="'+f.id+'">Open in editor</button><button class="btn btn-sm btn-ghost" data-del="'+f.id+'">Delete</button></div></div>';}).join(""));
+  var nb=byId("newFolderBtn");if(nb)nb.addEventListener("click",function(){var n=prompt("Folder name:");if(n&&n.trim()){var id="f"+Date.now();state.folders.push({id:id,name:n.trim(),deleted:false,code:"void setup() {\n  \n}\n\nvoid loop() {\n  \n}\n"});state.editorFolderId=id;logActivity('Created folder "'+n.trim()+'".');render();}});
+  qsa("[data-del]").forEach(function(btn){btn.addEventListener("click",function(){var f=state.folders.find(function(x){return x.id===btn.dataset.del;});if(!confirm('Delete "'+f.name+'"? Its issues will no longer appear anywhere in the app.'))return;f.deleted=true;logActivity('Deleted folder "'+f.name+'".');addNotification('Folder "'+f.name+'" was deleted.');render();toast('Folder deleted - it will no longer appear anywhere in Alu-Coding.');});});
+  qsa("[data-open]").forEach(function(btn){btn.addEventListener("click",function(){state.editorFolderId=btn.dataset.open;state.view="home";qsa(".nav-item[data-view]").forEach(function(i){i.classList.remove("active");});var ne=document.querySelector('.nav-item[data-view="home"]');if(ne)ne.classList.add("active");render();});});
+}
+
+function renderHome(p){
+  var folders=activeFolders(),lessons=lessonSets[state.role]||lessonSets.standard,current=null;
+  if(folders.length){if(!state.editorFolderId||!folders.find(function(f){return f.id===state.editorFolderId;})){state.editorFolderId=folders[0].id;}current=folders.find(function(f){return f.id===state.editorFolderId;});}
+  var ch;
+  if(!current){ch='<div class="empty-state">No folders yet - create one from Folders to start coding.</div>';}
+  else{
+    ch='<div class="toolbar" style="margin-bottom:10px;"><div class="menu-item" id="editMenuBtn">Edit &#9662;<div class="menu-dropdown" id="editMenuDropdown"><button data-editaction="undo">&#8630; Undo</button><button data-editaction="redo">&#8631; Redo</button><button data-editaction="cut">Cut</button><button data-editaction="copy">Copy</button><button data-editaction="paste">Paste</button><button data-editaction="selectAll">Select All</button><button data-editaction="find">&#128269; Find</button></div></div><div style="flex:1;"></div><select id="boardSelect" class="mini">'+SUPPORTED_BOARDS.map(function(b){return'<option value="'+b.id+'" '+(b.id===state.selectedBoardId?"selected":"")+'>'+escapeHtml(b.name)+' &middot; '+escapeHtml(b.defaultPort)+' (simulated)</option>';}).join("")+'</select></div><div class="editor-tabs" id="editorTabs">'+folders.map(function(f){return'<button class="editor-tab '+(f.id===current.id?"active":"")+'" data-tab="'+f.id+'">'+escapeHtml(f.name)+'</button>';}).join("")+'</div><div class="editor-shell"><div id="codeEditorSlot" class="editor-textarea" style="padding:0;overflow:hidden;"></div><div class="editor-side"><div style="display:flex;gap:8px;margin-bottom:12px;"><button class="btn btn-sm btn-ghost" id="saveCodeBtn">Save</button><button class="btn btn-sm btn-primary" id="runCodeBtn">&#9654; Run / Flash</button></div>'+(state.role==="student"?'<button class="btn btn-sm btn-ghost" id="hintBtn" style="width:100%;justify-content:center;margin-bottom:12px;">&#128161; Get a hint</button><div id="hintNote"></div>':"")+'<div class="hw-row"><button class="btn btn-sm btn-ghost" id="connectSerialBtn">&#128268; Connect board</button><span class="hw-status" id="serialStatus">'+(serialPort?"Connected":"Not connected")+'</span></div><div class="hw-row"><button class="btn btn-sm btn-ghost" id="liveFeedBtn">&#9654; Start live feed</button><span class="hw-status" id="liveFeedStatus">'+(liveFeedRunning?"Running":"Stopped")+'</span></div><div class="hw-row"><label class="btn btn-sm btn-ghost" style="cursor:pointer;">&#128193; Upload .hex<input type="file" id="hexFileInput" accept=".hex" style="display:none;"></label><span class="hw-status" id="hexStatus">'+(state.loadedHex?state.loadedHex.byteLength+" bytes loaded":"No file loaded")+'</span></div><div class="field" style="margin-bottom:10px;"><label style="font-size:0.68rem;">Compiler API URL (optional)</label><input type="text" id="compilerUrlInput" placeholder="https://your-compile-server.example.com/compile" value="'+escapeHtml(state.compilerApiUrl||"")+'"></div><div class="side-tabs" id="sideTabs"><button class="side-tab active" data-sidetab="console">Console</button><button class="side-tab" data-sidetab="monitor">Monitor</button><button class="side-tab" data-sidetab="plotter">Plotter</button><button class="side-tab" data-sidetab="reference">Reference</button></div><div class="side-panel" id="panel-console"><div class="console-box" id="consoleBox"><div class="console-line" style="color:var(--text-faint);">Console output will appear here.</div></div></div><div class="side-panel hidden" id="panel-monitor"><div class="console-box" id="serialMonitorBox"><div class="console-line" style="color:var(--text-faint);">Connect a board and start the live feed to see incoming data.</div></div><div class="chat-input-row" style="margin-top:8px;"><input type="text" id="monitorSendInput" placeholder="Send to board..."><button class="btn btn-sm btn-primary" id="monitorSendBtn">Send</button></div></div><div class="side-panel hidden" id="panel-plotter"><canvas id="plotterCanvas" width="340" height="160" class="plotter-canvas"></canvas></div><div class="side-panel hidden" id="panel-reference"><input type="text" id="refSearchInput" class="ref-search" placeholder="Search 120+ keywords..."><div id="refList" class="ref-list"></div></div></div></div>'+(state.role==="professional"?'<div class="ai-card"><h4>&#129302; AI pair programmer <span class="ai-status" id="copilotAiStatus">Idle</span></h4><div class="ai-sub">Reviews the current file and answers questions.</div><div class="chat-log" id="copilotChatLog"></div><div class="chat-input-row"><input type="text" id="copilotChatInput" placeholder="Ask about this code..."><button class="btn btn-sm btn-primary" id="copilotChatSend">Send</button></div></div>':"");
+  }
+  p.innerHTML='<div class="panel-head"><h2>Home</h2><div style="font-size:0.82rem;color:var(--text-faint);">Signed in as <strong style="color:var(--turquoise);">'+roleLabel(state.role)+'</strong></div></div><div class="role-banner">'+roleBannerText[state.role]+'</div><div class="section-label" style="margin-top:0;">Coding place</div>'+ch+'<div class="section-label">Learning place</div><div class="lesson-grid">'+lessons.map(function(l){return'<div class="lesson-card"><div class="lesson-tag">'+l.tag+'</div><div class="lt">'+escapeHtml(l.title)+'</div><div class="ld">'+escapeHtml(l.desc)+'</div></div>';}).join("")+'</div><div class="ai-card"><h4>&#129302; AI learning tutor <span class="ai-status" id="tutorAiStatus">Idle</span></h4><div class="ai-sub">Guides you through the lessons above.</div><div class="chat-log" id="tutorChatLog"></div><div class="chat-input-row"><input type="text" id="tutorChatInput" placeholder="Ask the tutor a question..."><button class="btn btn-sm btn-primary" id="tutorChatSend">Send</button></div></div>';
+  if(current){
+    qsa(".editor-tab").forEach(function(tab){tab.addEventListener("click",function(){state.editorFolderId=tab.dataset.tab;render();});});
+    var slot=byId("codeEditorSlot");slot.appendChild(getOrCreateEditorMount());
+    ensureMonacoLoaded().then(function(){var fn=state.folders.find(function(f){return f.id===state.editorFolderId;});if(!fn)return;if(!monacoEditor){monacoEditor=monaco.editor.create(codeEditorMountEl,{value:fn.code||"",language:"cpp",theme:"vs-dark",automaticLayout:true,minimap:{enabled:false},fontSize:13,fontFamily:"JetBrains Mono, monospace"});monacoEditor.onDidChangeModelContent(function(){if(monacoSuppressChange)return;var f=state.folders.find(function(x){return x.id===state.editorFolderId;});if(f)f.code=monacoEditor.getValue();});}else{monacoSuppressChange=true;if(monacoEditor.getValue()!==fn.code)monacoEditor.setValue(fn.code||"");monacoSuppressChange=false;monacoEditor.layout();}}).catch(function(err){slot.innerHTML='<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;">Couldn\'t load the Monaco editor ('+escapeHtml(err.message)+').</div>';});
+    byId("boardSelect").addEventListener("change",function(e){state.selectedBoardId=e.target.value;});
+    byId("saveCodeBtn").addEventListener("click",function(){logActivity('Saved code in "'+current.name+'".');toast("Saved.");});
+    byId("runCodeBtn").addEventListener("click",function(){runBuild(current);});
+    byId("connectSerialBtn").addEventListener("click",function(){connectSerial().then(function(){var st=byId("serialStatus");if(st){st.textContent="Connected";st.classList.add("live");}toast("Serial port connected.");}).catch(function(err){var st=byId("serialStatus");if(st)st.textContent=err.message;toast("Couldn't connect: "+err.message);});});
+    byId("liveFeedBtn").addEventListener("click",function(){var btn=byId("liveFeedBtn"),st=byId("liveFeedStatus");if(!liveFeedRunning){startLiveFeed().then(function(){btn.innerHTML="&#9724; Stop live feed";st.textContent="Running";st.classList.add("live");}).catch(function(err){toast("Couldn't start live feed: "+err.message);});}else{stopLiveFeed();btn.innerHTML="&#9654; Start live feed";st.textContent="Stopped";st.classList.remove("live");}});
+    qsa(".side-tab").forEach(function(tab){tab.addEventListener("click",function(){qsa(".side-tab").forEach(function(t){t.classList.toggle("active",t===tab);});qsa(".side-panel").forEach(function(p){p.classList.toggle("hidden",p.id!=="panel-"+tab.dataset.sidetab);});if(tab.dataset.sidetab==="plotter")drawPlotter();});});
+    byId("monitorSendBtn").addEventListener("click",function(){var inp=byId("monitorSendInput"),t=inp.value;if(!t)return;sendBytesOverSerial(new TextEncoder().encode(t+"\n")).then(function(){inp.value="";}).catch(function(err){toast("Couldn't send: "+err.message);});});
+    byId("editMenuBtn").addEventListener("click",function(e){e.stopPropagation();byId("editMenuDropdown").classList.toggle("open");});
+    qsa("[data-editaction]").forEach(function(btn){btn.addEventListener("click",function(e){e.stopPropagation();runMonacoAction(btn.dataset.editaction);byId("editMenuDropdown").classList.remove("open");});});
+    renderReferenceList("");byId("refSearchInput").addEventListener("input",function(e){renderReferenceList(e.target.value);});
+    byId("hexFileInput").addEventListener("change",function(e){var file=e.target.files[0];if(!file)return;var r=new FileReader();r.onload=function(){var st=byId("hexStatus");try{var pa=parseIntelHex(r.result);state.loadedHex=pa;if(st){st.textContent=file.name+" - "+pa.byteLength+" bytes";st.classList.add("live");st.classList.remove("error");}toast("Parsed "+pa.byteLength+" bytes from "+file.name+".");}catch(err){state.loadedHex=null;if(st){st.textContent="Parse error: "+err.message;st.classList.add("error");st.classList.remove("live");}toast("Couldn't parse that .hex file.");}};r.readAsText(file);});
+    byId("compilerUrlInput").addEventListener("change",function(e){state.compilerApiUrl=e.target.value.trim();});
+    if(state.role==="student")byId("hintBtn").addEventListener("click",function(){var h=hintBank[Math.floor(Math.random()*hintBank.length)];byId("hintNote").innerHTML='<div class="hint-note">'+escapeHtml(h)+'</div>';});
+    if(state.role==="professional")wireChat("copilot");
+  }
+  wireChat("tutor");
+}
+
+async function callAiAgent(kind,chatArr,userMsg){
+  var sp=kind==="tutor"?"You are the AI learning tutor inside a coding app called Alu-Coding, helping a "+roleLabel(state.role)+" learn to write and flash simple embedded/Arduino-style code. Explain the underlying concept rather than just handing over a finished answer. Keep replies short, 2-4 sentences.":"You are the AI pair programmer inside a coding app called Alu-Coding, reviewing embedded/Arduino-style code for a professional developer. Give a concise, specific review comment or answer, like a code review remark. Keep replies short, 2-4 sentences.";
+  var hist=chatArr.slice(-6).map(function(m){return{role:m.from==="user"?"user":"assistant",content:m.text};});
+  hist.push({role:"user",content:userMsg});
+  try{var res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:sp,messages:hist})});if(!res.ok)throw new Error("status "+res.status);var data=await res.json();var blk=(data.content||[]).find(function(b){return b.type==="text"&&b.text;});if(!blk)throw new Error("empty response");return{text:blk.text.trim(),live:true};}catch(err){var tips=kind==="tutor"?hintBank:copilotTips;return{text:tips[Math.floor(Math.random()*tips.length)],live:false};}
+}
+function setAiStatus(kind,live){var el=byId(kind+"AiStatus");if(!el)return;el.textContent=live?"Live AI":"Demo mode (offline)";el.classList.toggle("live",live);el.classList.toggle("offline",!live);}
+function wireChat(kind){
+  var ca=kind==="tutor"?state.tutorChat:state.copilotChat;
+  var le=byId(kind+"ChatLog");
+  le.innerHTML=ca.map(function(m){return'<div class="chat-msg '+m.from+'">'+escapeHtml(m.text)+'</div>';}).join("");
+  le.scrollTop=le.scrollHeight;
+  function send(){
+    var inp=byId(kind+"ChatInput");var msg=inp.value.trim();if(!msg)return;
+    ca.push({from:"user",text:msg});
+    var d=document.createElement("div");d.className="chat-msg user";d.textContent=msg;le.appendChild(d);le.scrollTop=le.scrollHeight;inp.value="";
+    var pe=document.createElement("div");pe.className="chat-msg agent";pe.textContent="...thinking";le.appendChild(pe);le.scrollTop=le.scrollHeight;
+    callAiAgent(kind,ca,msg).then(function(r){pe.textContent=r.text;ca.push({from:"agent",text:r.text});setAiStatus(kind,r.live);logActivity(kind==="tutor"?"Asked the AI learning tutor a question.":"Asked the AI pair programmer a question.");});
+  }
+  byId(kind+"ChatSend").addEventListener("click",send);
+  byId(kind+"ChatInput").addEventListener("keydown",function(e){if(e.key==="Enter")send();});
+}
+
+function runBuild(folder){
+  var box=byId("consoleBox");box.innerHTML="";byId("runCodeBtn").disabled=true;
+  var board=SUPPORTED_BOARDS.find(function(b){return b.id===state.selectedBoardId;})||SUPPORTED_BOARDS[0];
+  function pl(t,e){var d=document.createElement("div");d.className="console-line"+(e?" console-error":"");d.textContent=t;box.appendChild(d);box.scrollTop=box.scrollHeight;return d;}
+  function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+  function finishUp(){byId("runCodeBtn").disabled=false;logActivity('Ran / flashed "'+folder.name+'".');addNotification('"'+folder.name+'" build finished on '+board.name+'.');if(state.role==="professional"){var log=byId("copilotChatLog");if(log){var pe=document.createElement("div");pe.className="chat-msg agent";pe.textContent="...reviewing the build";log.appendChild(pe);log.scrollTop=log.scrollHeight;callAiAgent("copilot",state.copilotChat,"Give one brief, specific review comment about this Arduino-style sketch:\n\n"+folder.code).then(function(r){pe.textContent=r.text;state.copilotChat.push({from:"agent",text:r.text});setAiStatus("copilot",r.live);});}}if(state.role==="student"){var el=pl("Plain-English recap...");el.style.color="var(--warn)";callAiAgent("tutor",[],"In one short, plain-language sentence a beginner can follow, explain what this Arduino-style sketch does:\n\n"+folder.code).then(function(r){el.textContent=r.text;});}}
+  pl("Compiling "+folder.name+" ...");
+  var cs;
+  if(state.compilerApiUrl){cs=compileViaApi(folder.code,board.id).then(function(ht){pl("Compiler API: build succeeded.");return parseIntelHex(ht);});}
+  else if(state.loadedHex){pl("No compiler API configured - using the .hex file you uploaded instead of compiling.");cs=Promise.resolve(state.loadedHex);}
+  else{cs=wait(500).then(function(){pl("Sketch uses "+(1200+Math.floor(Math.random()*900))+" bytes of program storage. (simulated - no compiler configured)");return null;});}
+  cs.then(function(hr){if(!hr){return wait(400).then(function(){pl("Uploading to "+board.name+" on "+board.defaultPort+" ... (simulated)");return wait(500);}).then(function(){pl("Done uploading. (simulated)");});}if(serialPort&&serialPort.writable){pl("Sending "+hr.byteLength+" real bytes to "+board.name+" over the open serial connection ...");return sendBytesOverSerial(hr.bytes).then(function(){pl("Sent "+hr.byteLength+" raw bytes over serial.");pl("Note: real wire transfer, but no STK500 bootloader handshake yet - a stock Uno won't start running this from raw bytes alone.");});}pl('Parsed a real hex file ('+hr.byteLength+' bytes) - click "Connect board" to actually send it over serial.');}).then(function(){toast("Build finished - see console.");finishUp();}).catch(function(err){pl("Error: "+err.message,true);toast("Build failed - see console.");byId("runCodeBtn").disabled=false;});
+}
+
+function renderNotifications(p){p.innerHTML='<div class="panel-head"><h2>Notifications</h2></div><div class="toggle-row"><div><div style="font-weight:600;font-size:0.9rem;">Email updates</div><div style="font-size:0.78rem;color:var(--text-faint);margin-top:2px;">Get an email whenever an issue you follow changes priority or status.</div></div><button class="switch '+(state.emailUpdates?"on":"")+'" id="emailToggle"></button></div>'+state.notifications.map(function(n){return'<div class="notif-item"><div class="dot2"></div><div><div>'+escapeHtml(n.text)+'</div><div style="color:var(--text-faint);font-size:0.74rem;margin-top:2px;">'+n.time+'</div></div></div>';}).join("");byId("emailToggle").addEventListener("click",function(){state.emailUpdates=!state.emailUpdates;logActivity("Turned email updates "+(state.emailUpdates?"on":"off")+".");render();});}
+function renderHistory(p){p.innerHTML='<div class="panel-head"><h2>Your history</h2></div><div>'+state.activityLog.map(function(h){return'<div class="history-item"><div class="ht">'+h.time+'</div><div>'+escapeHtml(h.text)+'</div></div>';}).join("")+'</div>';}
+
+function renderReferenceList(filter){
+  var list=byId("refList");if(!list)return;
+  var q=(filter||"").toLowerCase();
+  var items=LANGUAGE_REFERENCE.filter(function(r){return!q||r.key.toLowerCase().indexOf(q)!==-1||r.desc.toLowerCase().indexOf(q)!==-1;});
+  list.innerHTML=items.length?items.map(function(r){return'<div class="ref-item"><div class="ref-key">'+escapeHtml(r.key)+'</div><div class="ref-desc">'+escapeHtml(r.desc)+'</div></div>';}).join(""):'<div class="empty-state" style="padding:16px;">No matches.</div>';
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  byId("privacyModal").classList.remove("hidden");
+  if(EMAILJS_DEFAULT.publicKey&&window.emailjs){try{window.emailjs.init({publicKey:EMAILJS_DEFAULT.publicKey});}catch(e){console.warn("EmailJS init failed:",e);}}
+});
+})();
+</script>
+</body>
+</html>
