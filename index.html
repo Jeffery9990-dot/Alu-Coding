@@ -657,7 +657,7 @@ function sendMfaCodeByEmail(toEmail, code){
   }).then(function(data){
     if(!data.success) throw new Error(data.message || "Web3Forms send failed");
   });
-}
+  }
 function compileViaApi(code,boardId){
   if(!state.compilerApiUrl)return Promise.reject(new Error("no compiler API configured"));
   return fetch(state.compilerApiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,board:boardId})}).then(function(res){if(!res.ok)throw new Error("compiler API returned HTTP "+res.status);return res.json();}).then(function(result){if(!result||!result.success||!result.hex)throw new Error((result&&result.error)||"compiler API returned no hex output");return result.hex;});
@@ -1012,4 +1012,7 @@ function renderReferenceList(filter){
 document.addEventListener("DOMContentLoaded",function(){
   byId("privacyModal").classList.remove("hidden");
   if(EMAILJS_DEFAULT.publicKey&&window.emailjs){try{window.emailjs.init({publicKey:EMAILJS_DEFAULT.publicKey});}catch(e){console.warn("EmailJS init failed:",e);}}
-})();
+});
+</script>
+</body>
+</html>
