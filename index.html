@@ -223,7 +223,13 @@
   .chat-input-row{display:flex;gap:8px;}
   .chat-input-row input{flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:0.85rem;}
   .hint-note{margin-top:10px;padding:10px 12px;background:rgba(255,194,75,0.08);border:1px solid rgba(255,194,75,0.35);border-radius:8px;font-size:0.8rem;color:var(--warn);}
-  .toast{position:fixed;bottom:22px;right:22px;background:var(--bg-raised);border:1px solid var(--turquoise);color:var(--text);padding:12px 18px;border-radius:9px;font-size:0.85rem;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,0.4);opacity:0;transform:translateY(8px);transition:.2s;}
+  .forgot-link{text-align:right;margin-top:-4px;margin-bottom:10px;}
+.forgot-link button{background:none;border:none;color:var(--turquoise);font-size:0.78rem;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;}.auth-mode-toggle{display:flex;margin-bottom:18px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.auth-mode-toggle button{flex:1;padding:10px;background:transparent;border:none;color:var(--text-muted);font-size:0.85rem;cursor:pointer;font-family:inherit;font-weight:500;transition:background .15s,color .15s;}
+.auth-mode-toggle button.active{background:rgba(47,224,196,0.12);color:var(--turquoise);}
+.pw-rules{font-size:0.7rem;color:var(--text-faint);margin-top:6px;line-height:1.8;}
+.pw-rules .ok{color:var(--turquoise);}
+.pw-rules .bad{color:var(--text-faint);}.toast{position:fixed;bottom:22px;right:22px;background:var(--bg-raised);border:1px solid var(--turquoise);color:var(--text);padding:12px 18px;border-radius:9px;font-size:0.85rem;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,0.4);opacity:0;transform:translateY(8px);transition:.2s;}
   .toast.show{opacity:1;transform:translateY(0);}
 </style>
 </head>
@@ -281,12 +287,23 @@
 <div id="app-view" class="hidden">
   <div id="authScreen" class="auth-shell">
     <div class="auth-card" id="loginCard">
-      <h2>Log in to Alu-Coding</h2>
-      <div class="sub">Role-based access — what you see depends on your account type.</div>
+          <div class="auth-mode-toggle">
+            <button type="button" class="active" id="modeLogin">Log in</button> 
+        <button type="button" id="modeSignup">Sign up</button>
+      </div>
+      <h2 id="loginTitle">Log in to Alu-Coding</h2>
+      <div class="sub" id="loginSub">Role-based access — what you see depends on your account type.</div>
       <div class="auth-error" id="loginError"></div>
       <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="Enter your email address" autocomplete="email"></div>
-      <div class="field"><label>Password</label><div class="password-wrap"><input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password"><button type="button" class="password-toggle" id="passwordToggleBtn">Show</button></div></div>
-      <div class="field"><label>Choose your role</label><div class="role-picker" id="rolePicker">
+      <div class="field"><label>Password</label><div class="password-wrap"><input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password"><button type="button" class="password-toggle" id="passwordToggleBtn">Show</button></div>
+        <div class="pw-rules" id="pwRules" style="display:none;">
+          <div id="rule-len" class="bad">☐ At least 8 characters</div>
+          <div id="rule-upper" class="bad">☐ At least 1 uppercase letter (A-Z)</div>
+          <div id="rule-lower" class="bad">☐ At least 1 lowercase letter (a-z)</div>
+          <div id="rule-num" class="bad">☐ At least 1 number (0-9)</div>
+        </div>
+      </div>
+            <div class="forgot-link" id="forgotLink"><button type="button" id="forgotBtn">Forgot password?</button></div><div class="field" id="rolePickerField"><label>Choose your role</label><div class="role-picker" id="rolePicker">
         <button type="button" class="role-card" data-role="student"><div class="rc-head"><span class="rc-emoji">&#127891;</span><span class="rc-title">Student</span></div><div class="rc-tagline">Learning, guided practice, and academic support.</div><ul class="rc-features"><li>Interactive tutorials with built-in hints</li><li>Sandboxed code playground</li><li>Visual debugger with plain-language errors</li><li>Assignment portal — import tasks, track deadlines</li><li>AI tutor that explains concepts, not just answers</li></ul></button>
         <button type="button" class="role-card active" data-role="standard"><div class="rc-head"><span class="rc-emoji">&#128100;</span><span class="rc-title">Standard user</span></div><div class="rc-tagline">For hobbyists, casual creators, and general use.</div><ul class="rc-features"><li>Multi-language IDE with autocomplete</li><li>Cloud storage for your projects</li><li>Simple built-in version history</li><li>Ready-to-use project templates</li><li>One-click community sharing</li></ul></button>
         <button type="button" class="role-card" data-role="professional"><div class="rc-head"><span class="rc-emoji">&#128188;</span><span class="rc-title">Professional</span></div><div class="rc-tagline">Speed, advanced development, and team collaboration.</div><ul class="rc-features"><li>Real-time, Google Docs-style co-editing</li><li>Deep terminal access &amp; performance profiling</li><li>CI/CD deploys to GitHub, AWS, or Vercel</li><li>2FA, encryption &amp; role-based permissions</li><li>Pro AI copilot for generation &amp; refactoring</li></ul></button>
@@ -295,13 +312,32 @@
       <button class="btn btn-primary" style="width:100%;justify-content:center;" id="loginSubmit">Continue</button>
       <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;" id="backToLanding">&larr; Back</button>
     </div>
-    <div class="auth-card hidden" id="mfaCard">
+    
+          <div class="auth-card hidden" id="mfaCard">
       <h2>Two-step verification</h2><div class="sub">Enter the 6-digit code to finish signing in.</div>
       <div class="auth-error" id="mfaError"></div>
       <div class="mfa-code-boxes"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"><input maxlength="1" class="mfa-box"></div>
       <div class="mfa-hint" id="mfaHint">Sending your verification code…</div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;" id="mfaSubmit">Verify &amp; sign in</button>
       <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;" id="mfaBack">&larr; Back</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:6px;color:var(--turquoise);" id="resendCodeBtn">Didn't get the code? Resend</button>
+    </div>
+    <div class="auth-card hidden" id="resetCard">
+      <h2>Reset password</h2><div class="sub">Enter the 6-digit code from your email and a new password.</div>
+      <div class="auth-error" id="resetError"></div>
+      <div class="mfa-code-boxes"><input maxlength="1" class="reset-box"><input maxlength="1" class="reset-box"><input maxlength="1" class="reset-box"><input maxlength="1" class="reset-box"><input maxlength="1" class="reset-box"><input maxlength="1" class="reset-box"></div>
+      <div class="mfa-hint" id="resetHint">Enter the code sent to your email.</div>
+      <div class="field"><label>New password</label><div class="password-wrap"><input type="password" id="resetPassword" placeholder="Enter your new password"><button type="button" class="password-toggle" id="resetPasswordToggle">Show</button></div>
+        <div class="pw-rules" id="resetPwRules">
+          <div id="reset-rule-len" class="bad">&#9744; At least 8 characters</div>
+          <div id="reset-rule-upper" class="bad">&#9744; At least 1 uppercase letter (A-Z)</div>
+          <div id="reset-rule-lower" class="bad">&#9744; At least 1 lowercase letter (a-z)</div>
+          <div id="reset-rule-num" class="bad">&#9744; At least 1 number (0-9)</div>
+        </div>
+      </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;" id="resetSubmit">Reset password</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;" id="resetBack">&larr; Back to login</button>
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:6px;color:var(--turquoise);" id="resendResetBtn">Didn't get the code? Resend</button>
     </div>
   </div>
   <div id="dashboard" class="app-chrome hidden">
@@ -627,6 +663,161 @@ function compileViaApi(code,boardId){
   return fetch(state.compilerApiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,board:boardId})}).then(function(res){if(!res.ok)throw new Error("compiler API returned HTTP "+res.status);return res.json();}).then(function(result){if(!result||!result.success||!result.hex)throw new Error((result&&result.error)||"compiler API returned no hex output");return result.hex;});
 }
 
+var authMode="login";
+function validatePassword(pw){
+  if(!pw||pw.length<8) return "Password must be at least 8 characters.";
+  if(!/[A-Z]/.test(pw)) return "Password must include at least one uppercase letter (A-Z).";
+  if(!/[a-z]/.test(pw)) return "Password must include at least one lowercase letter (a-z).";
+  if(!/[0-9]/.test(pw)) return "Password must include at least one number (0-9).";
+  return null;
+}
+function updatePwRules(pw){
+  var el=byId("pwRules");if(!el)return;
+  if(authMode!=="signup"){el.style.display="none";return;}
+  el.style.display="block";
+  var rules=[
+    {id:"rule-len",ok:pw&&pw.length>=8},
+    {id:"rule-upper",ok:pw&&/[A-Z]/.test(pw)},
+    {id:"rule-lower",ok:pw&&/[a-z]/.test(pw)},
+    {id:"rule-num",ok:pw&&/[0-9]/.test(pw)}
+  ];
+  rules.forEach(function(r){
+    var e=byId(r.id);if(!e)return;
+    e.className=r.ok?"ok":"bad";
+    e.innerHTML=(r.ok?"&#10003;":"&#9744; ")+e.innerHTML.replace(/^<[^>]+>/,"").replace(/^[\u2713\u2610\u2714]\s*/,"");
+    if(r.ok){if(e.textContent.indexOf("At")===0)e.innerHTML="&#10003; "+e.textContent;}
+    else{if(e.textContent.indexOf("At")===0)e.innerHTML="&#9744; "+e.textContent;}
+  });
+}
+function getStoredAccounts(){
+  try{var raw=localStorage.getItem("alu_accounts");if(raw)return JSON.parse(raw);}catch(e){}
+  return{};
+}
+function saveAccount(email,password,role){
+  var accounts=getStoredAccounts();
+  accounts[email.toLowerCase()]={password:password,role:role};
+  try{localStorage.setItem("alu_accounts",JSON.stringify(accounts));}catch(e){}
+}
+function findAccount(email){
+  var accounts=getStoredAccounts();
+  return accounts[email.toLowerCase()]||null;
+}
+
+byId("modeLogin").addEventListener("click",function(){
+  authMode="login";
+  byId("modeLogin").classList.add("active");
+  byId("modeSignup").classList.remove("active");
+  byId("loginTitle").textContent="Log in to Alu-Coding";
+  byId("loginSub").textContent="Enter your credentials to sign in.";
+  byId("loginSubmit").textContent="Continue";
+  byId("rolePickerField").style.display="none";
+  byId("pwRules").style.display="none";
+  byId("loginPassword").placeholder="Enter your password";
+  byId("loginError").textContent="";
+  byId("forgotLink").style.display="block";
+});
+byId("modeSignup").addEventListener("click",function(){
+  authMode="signup";
+   byId("modeSignup").classList.add("active");
+  byId("modeLogin").classList.remove("active");
+  byId("forgotLink").style.display="none";
+  byId("loginTitle").textContent="Create an account";
+  byId("loginSub").textContent="Sign up for a new Alu-Coding account.";
+  byId("loginSubmit").textContent="Create account";
+  byId("rolePickerField").style.display="block";
+  byId("pwRules").style.display="block";
+  byId("loginPassword").placeholder="Create a strong password";
+  byId("loginError").textContent="";
+  updatePwRules(byId("loginPassword").value);
+});
+byId("loginPassword").addEventListener("input",function(e){
+  updatePwRules(e.target.value);
+});
+
+state.pendingResetCode=null;
+state.resetEmail=null;
+
+function updateResetPwRules(pw){
+  var el=byId("resetPwRules");if(!el)return;
+  var rules=[
+    {id:"reset-rule-len",text:"At least 8 characters",ok:pw&&pw.length>=8},
+    {id:"reset-rule-upper",text:"At least 1 uppercase letter (A-Z)",ok:pw&&/[A-Z]/.test(pw)},
+    {id:"reset-rule-lower",text:"At least 1 lowercase letter (a-z)",ok:pw&&/[a-z]/.test(pw)},
+    {id:"reset-rule-num",text:"At least 1 number (0-9)",ok:pw&&/[0-9]/.test(pw)}
+  ];
+  rules.forEach(function(r){
+    var e=byId(r.id);if(!e)return;
+    e.className=r.ok?"ok":"bad";
+    e.innerHTML=(r.ok?"&#10003; ":"&#9744; ")+r.text;
+  });
+}
+
+byId("forgotBtn").addEventListener("click",function(){
+  var email=byId("loginEmail").value.trim(),err=byId("loginError");
+  if(!email){err.textContent="Enter your email first.";return;}
+  var account=findAccount(email);
+  if(!account){err.textContent="No account found with this email.";return;}
+  err.textContent="";
+  state.resetEmail=email;
+  state.pendingResetCode=String(Math.floor(100000+Math.random()*900000));
+  byId("loginCard").classList.add("hidden");
+  byId("resetCard").classList.remove("hidden");
+  byId("resetHint").textContent="Sending reset code to "+email+"...";
+  qsa(".reset-box").forEach(function(b){b.value="";});
+  qsa(".reset-box")[0].focus();
+  sendMfaCodeByEmail(email,state.pendingResetCode).then(function(){
+    byId("resetHint").textContent="A 6-digit reset code was sent to "+email+". Check your inbox and spam folder.";
+  }).catch(function(reason){
+    byId("resetHint").innerHTML="Couldn't send email ("+escapeHtml(reason.message)+"). <div class='dev-code-box'>Your reset code is: <strong>"+state.pendingResetCode+"</strong></div>";
+  });
+});
+
+qsa(".reset-box").forEach(function(b,idx,arr){
+  b.addEventListener("input",function(){b.value=b.value.replace(/[^0-9]/g,"").slice(0,1);if(b.value&&arr[idx+1])arr[idx+1].focus();});
+  b.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!b.value&&arr[idx-1])arr[idx-1].focus();});
+});
+
+byId("resetPassword").addEventListener("input",function(e){updateResetPwRules(e.target.value);});
+
+byId("resetPasswordToggle").addEventListener("click",function(){
+  var i=byId("resetPassword"),b=byId("resetPasswordToggle");
+  if(i.type==="password"){i.type="text";b.textContent="Hide";}else{i.type="password";b.textContent="Show";}
+});
+byId("resetBack").addEventListener("click",function(){
+  byId("resetCard").classList.add("hidden");
+  byId("loginCard").classList.remove("hidden");
+});
+byId("resendResetBtn").addEventListener("click",function(){
+  if(!state.resetEmail)return;
+  state.pendingResetCode=String(Math.floor(100000+Math.random()*900000));
+  byId("resetHint").textContent="Resending reset code to "+state.resetEmail+"...";
+  qsa(".reset-box").forEach(function(b){b.value="";});
+  qsa(".reset-box")[0].focus();
+  sendMfaCodeByEmail(state.resetEmail,state.pendingResetCode).then(function(){
+    byId("resetHint").textContent="A new reset code was sent to "+state.resetEmail+". Check your inbox and spam folder.";
+    toast("New reset code sent.");
+  }).catch(function(reason){
+    byId("resetHint").innerHTML="Couldn't resend ("+escapeHtml(reason.message)+'). <div class="dev-code-box">Your new reset code is: <strong>'+state.pendingResetCode+'</strong></div>';
+  });
+});
+byId("resetSubmit").addEventListener("click",function(){
+  var code=qsa(".reset-box").map(function(b){return b.value;}).join(""),
+      newPw=byId("resetPassword").value,err=byId("resetError");
+  err.textContent="";
+  if(code.length<6){err.textContent="Enter all 6 digits of the reset code.";return;}
+  if(code!==state.pendingResetCode){err.textContent="Wrong reset code. Try again.";return;}
+  var pwError=validatePassword(newPw);
+  if(pwError){err.textContent=pwError;return;}
+  var account=findAccount(state.resetEmail);
+  if(!account){err.textContent="Account not found.";return;}
+  saveAccount(state.resetEmail,newPw,account.role);
+  toast("Password reset! You can now log in with your new password.");
+  byId("resetCard").classList.add("hidden");
+  byId("loginCard").classList.remove("hidden");
+  byId("loginEmail").value=state.resetEmail;
+  byId("loginPassword").value="";
+  byId("loginError").textContent="";
+});
 byId("privacyAccept").addEventListener("click",function(){state.privacyAccepted=true;byId("privacyModal").classList.add("hidden");byId("landing").classList.remove("hidden");});
 byId("privacyDecline").addEventListener("click",function(){state.privacyAccepted=false;byId("privacyModal").classList.add("hidden");byId("landing").classList.remove("hidden");byId("goLogin").disabled=true;byId("goDownload").disabled=true;toast("You can accept the privacy policy any time from the top bar to unlock login & download.");});
 qsa(".folder-head").forEach(function(h){h.addEventListener("click",function(){h.parentElement.classList.toggle("open");});});
@@ -649,21 +840,57 @@ byId("emailjsTemplateIdInput").addEventListener("input",function(e){state.emailj
 byId("emailjsPublicKeyInput").addEventListener("input",function(e){state.emailjsPublicKey=e.target.value.trim();});
 byId("passwordToggleBtn").addEventListener("click",function(){var i=byId("loginPassword");var b=byId("passwordToggleBtn");if(i.type==="password"){i.type="text";b.textContent="Hide";}else{i.type="password";b.textContent="Show";}});
 byId("mfaBack").addEventListener("click",function(){byId("mfaCard").classList.add("hidden");byId("loginCard").classList.remove("hidden");});
-
+byId("resendCodeBtn").addEventListener("click",function(){
+  if(!state.email)return;
+  state.pendingMfaCode=String(Math.floor(100000+Math.random()*900000));
+  byId("mfaHint").textContent="Resending your verification code...";
+  qsa(".mfa-box").forEach(function(b){b.value="";});
+  qsa(".mfa-box")[0].focus();
+  sendMfaCodeByEmail(state.email,state.pendingMfaCode).then(function(){
+    byId("mfaHint").textContent="A new 6-digit code was sent to "+state.email+". Check your inbox and spam folder.";
+    toast("New code sent.");
+  }).catch(function(reason){
+    byId("mfaHint").innerHTML="Couldn't resend ("+escapeHtml(reason.message)+'). <div class="dev-code-box">Your new code is: <strong>'+state.pendingMfaCode+'</strong></div>';
+  });
+});
 byId("loginSubmit").addEventListener("click",function(){
   var email=byId("loginEmail").value.trim(),pw=byId("loginPassword").value,err=byId("loginError");
-  err.textContent="";if(!email||!pw){err.textContent="Enter both an email and a password.";return;}
-  state.email=email;state.role=selectedLoginRole;
+  err.textContent="";
+  if(!email||!pw){err.textContent="Enter both an email and a password.";return;}
+  if(authMode==="signup"){
+    var pwError=validatePassword(pw);
+    if(pwError){err.textContent=pwError;return;}
+    if(findAccount(email)){err.textContent="An account with this email already exists. Click Log in to sign in instead.";return;}
+    saveAccount(email,pw,selectedLoginRole);
+    state.role=selectedLoginRole;
+  } else {
+    var account=findAccount(email);
+    if(!account){err.textContent="No account found with this email. Click Sign up to create one.";return;}
+    if(account.password!==pw){err.textContent="Wrong password. Try again.";return;}
+    state.role=account.role;
+    selectedLoginRole=account.role;
+    qsa(".role-card").forEach(function(c){c.classList.remove("active");if(c.dataset.role===account.role)c.classList.add("active");});
+  }
+  state.email=email;
   state.pendingMfaCode=String(Math.floor(100000+Math.random()*900000));
-  byId("loginCard").classList.add("hidden");byId("mfaCard").classList.remove("hidden");
+  byId("loginCard").classList.add("hidden");
+  byId("mfaCard").classList.remove("hidden");
   byId("mfaHint").textContent="Sending your verification code...";
-  qsa(".mfa-box").forEach(function(b){b.value="";});qsa(".mfa-box")[0].focus();
+  qsa(".mfa-box").forEach(function(b){b.value="";});
+  qsa(".mfa-box")[0].focus();
   sendMfaCodeByEmail(email,state.pendingMfaCode).then(function(){
     byId("mfaHint").textContent="We've emailed a 6-digit code to "+email+". Didn't get it? Check spam, or go back and re-check your email settings.";
   }).catch(function(reason){
     var why=reason.message==="no email service configured"?"email delivery isn't configured yet.":"the email service returned an error ("+escapeHtml(reason.message)+").";
     byId("mfaHint").innerHTML="No email was actually sent - "+why+' Go <button type="button" class="link-btn" id="mfaGoConfigureEmail">back</button> and fill in "Configure email delivery" for real delivery.<div class="dev-code-box">No email service is set up, so here is the code so you can still test logging in: <strong>'+state.pendingMfaCode+'</strong></div>';
-    var lb=byId("mfaGoConfigureEmail");if(lb)lb.addEventListener("click",function(){byId("mfaCard").classList.add("hidden");byId("loginCard").classList.remove("hidden");var es=byId("emailSettings");es.classList.remove("hidden");es.setAttribute("open","");});
+    var lb=byId("mfaGoConfigureEmail");
+    if(lb)lb.addEventListener("click",function(){
+      byId("mfaCard").classList.add("hidden");
+      byId("loginCard").classList.remove("hidden");
+      var es=byId("emailSettings");
+      es.classList.remove("hidden");
+      es.setAttribute("open","");
+    });
   });
 });
 
@@ -785,8 +1012,4 @@ function renderReferenceList(filter){
 document.addEventListener("DOMContentLoaded",function(){
   byId("privacyModal").classList.remove("hidden");
   if(EMAILJS_DEFAULT.publicKey&&window.emailjs){try{window.emailjs.init({publicKey:EMAILJS_DEFAULT.publicKey});}catch(e){console.warn("EmailJS init failed:",e);}}
-});
 })();
-</script>
-</body>
-</html>
