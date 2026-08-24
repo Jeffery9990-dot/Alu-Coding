@@ -362,7 +362,7 @@
 "use strict";
 var SUPPORTED_BOARDS=[{id:"uno",name:"Arduino Uno",defaultPort:"/dev/ttyUSB0"},{id:"nano",name:"Arduino Nano",defaultPort:"/dev/ttyUSB1"},{id:"mega2560",name:"Arduino Mega 2560",defaultPort:"/dev/ttyUSB0"},{id:"esp32",name:"ESP32 Dev Module",defaultPort:"/dev/ttyUSB2"},{id:"pico",name:"Raspberry Pi Pico",defaultPort:"/dev/ttyACM0"}];
 var MONACO_CDN_BASE="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.55.0/min/vs";
-var EMAILJS_DEFAULT={serviceId:"",templateId:"",publicKey:""};
+var EMAILJS_DEFAULT={serviceId:"service_g4d168n",templateId:"template_8xj0q4q",publicKey:"oK0lk5eCylPPBMN9h"};
 var emailjsConfiguredByOperator=!!(EMAILJS_DEFAULT.serviceId&&EMAILJS_DEFAULT.templateId&&EMAILJS_DEFAULT.publicKey);
 
 var codeEditorMountEl=null,monacoEditor=null,monacoLoadPromise=null,monacoSuppressChange=false;
@@ -642,22 +642,18 @@ function stopLiveFeed(){stopSerialReadLoop();liveFeedRunning=false;}
 function feedPlotterLine(line){var nums=line.split(/[,\s]+/).map(parseFloat).filter(function(n){return!isNaN(n);});if(nums.length===0)return;nums.forEach(function(n,i){if(!plotterSeries[i])plotterSeries[i]=[];plotterSeries[i].push(n);if(plotterSeries[i].length>PLOTTER_MAX_POINTS)plotterSeries[i].shift();});drawPlotter();}
 function drawPlotter(){var canvas=byId("plotterCanvas");if(!canvas)return;var ctx=canvas.getContext("2d");var w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle="rgba(255,255,255,0.08)";ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();var av=[];plotterSeries.forEach(function(s){av=av.concat(s);});if(av.length===0)return;var mn=Math.min.apply(null,av),mx=Math.max.apply(null,av);if(mn===mx){mn-=1;mx+=1;}plotterSeries.forEach(function(s,si){ctx.strokeStyle=PLOTTER_COLORS[si%PLOTTER_COLORS.length];ctx.lineWidth=1.5;ctx.beginPath();s.forEach(function(v,i){var x=(i/(PLOTTER_MAX_POINTS-1))*w;var y=h-((v-mn)/(mx-mn))*h;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();});}
 function sendMfaCodeByEmail(toEmail, code){
-  var formData = new FormData();
-  formData.append("access_key", "3c9efd34-67c7-4151-bf1e-b0c744a41560");
-  formData.append("subject", "Your Alu-Coding passcode");
-  formData.append("from_name", "Alu-Coding");
-  formData.append("email", toEmail);
-  formData.append("message", "Your Alu-Coding verification code is: " + code);
-  return fetch("https://api.web3forms.com/submit", {
-    method: "POST",
-    body: formData
-  }).then(function(res){
-    if(!res.ok) throw new Error("Web3Forms returned HTTP " + res.status);
-    return res.json();
-  }).then(function(data){
-    if(!data.success) throw new Error(data.message || "Web3Forms send failed");
+  return window.emailjs.send(
+    "service_w24joog",
+    "template_8xj0q4q",
+    { to_email: toEmail, passcode: code, from_name: "Alu-Coding" }
+  ).then(function(response){
+    console.log("[Alu-Coding] EmailJS success:", response.status);
+  }, function(err){
+    console.error("[Alu-Coding] EmailJS error:", err);
+    var msg = (err && err.text) ? err.text : (err && err.message) ? err.message : "EmailJS send failed";
+    throw new Error(msg);
   });
-  }
+}
 function compileViaApi(code,boardId){
   if(!state.compilerApiUrl)return Promise.reject(new Error("no compiler API configured"));
   return fetch(state.compilerApiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,board:boardId})}).then(function(res){if(!res.ok)throw new Error("compiler API returned HTTP "+res.status);return res.json();}).then(function(result){if(!result||!result.success||!result.hex)throw new Error((result&&result.error)||"compiler API returned no hex output");return result.hex;});
