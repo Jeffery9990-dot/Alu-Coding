@@ -231,6 +231,10 @@
 .pw-rules .ok{color:var(--turquoise);}
 .pw-rules .bad{color:var(--text-faint);}.toast{position:fixed;bottom:22px;right:22px;background:var(--bg-raised);border:1px solid var(--turquoise);color:var(--text);padding:12px 18px;border-radius:9px;font-size:0.85rem;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,0.4);opacity:0;transform:translateY(8px);transition:.2s;}
   .toast.show{opacity:1;transform:translateY(0);}
+    .field textarea{
+    width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
+    background:var(--bg); color:var(--text); font-size:0.9rem; resize:vertical; font-family:inherit;
+  }
 </style>
 </head>
 <body>
@@ -277,6 +281,67 @@
     </div>
     <div class="tagline"><span class="grad">Laziness cannot bring innovation, so start building.</span></div>
   </div>
+      <div class="section-label" style="margin-top:56px;">Frequently Asked Questions</div>
+    <div class="folder-stack" id="faqStackLanding">
+      <div class="folder-card" data-folder="faq1">
+        <div class="folder-head">
+          <div class="folder-id-title">
+            <div class="folder-icon fi-agent">&#10067;</div>
+            <div class="folder-titles">
+              <div class="ft-name">What is Alu-Coding?</div>
+            </div>
+          </div>
+          <div class="chev">&#9660;</div>
+        </div>
+        <div class="folder-body"><div class="folder-body-inner">
+          <div class="level-copy">Alu-Coding is an all-in-one development platform tailored for embedded systems and Arduino-style hardware. It combines a powerful code editor, a real-time hardware runner for flashing sketches, and a full issue tracker with calendar views and MFA-secured logins. Whether you're a student learning the ropes, a hobbyist building a smart home, or a professional developing commercial firmware, Alu-Coding streamlines your workflow.</div>
+        </div></div>
+      </div>
+
+      <div class="folder-card" data-folder="faq2">
+        <div class="folder-head">
+          <div class="folder-id-title">
+            <div class="folder-icon fi-agent">&#128274;</div>
+            <div class="folder-titles">
+              <div class="ft-name">Does my coding secure and private?</div>
+            </div>
+          </div>
+          <div class="chev">&#9660;</div>
+        </div>
+        <div class="folder-body"><div class="folder-body-inner">
+          <div class="level-copy">Yes. Your privacy is our priority. Alu-Coding runs code directly on your machine, and your source code never leaves your device without your explicit permission. We only collect what's needed for authentication, issue history, and email updates. All login credentials are hashed, and we support Multi-Factor Authentication (MFA) to ensure your account remains secure.</div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Still have questions? Contact us</div>
+    <div class="auth-card" style="max-width:600px; margin: 0 auto 40px auto;">
+      <form id="contactForm">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" id="contactName" placeholder="Enter your name" required>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="contactEmail" placeholder="Enter your email address" required>
+        </div>
+        <div class="field">
+          <label>Topic</label>
+          <select id="contactTopic" required>
+            <option value="general">General Inquiry</option>
+            <option value="support">Technical Support</option>
+            <option value="feedback">Feedback / Feature Request</option>
+            <option value="billing">Billing Question</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Message</label>
+          <textarea id="contactMessage" rows="4" placeholder="Write your message here..." required></textarea>
+        </div>
+        <div class="hint-note" style="margin-bottom:16px;">A reply will arrive within 48 hours.</div>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Send Message</button>
+      </form>
+    </div>
   <footer class="landing-footer">Alu-Coding — prototype build. No source code ever leaves your machine without your say-so.<br>If you have any issues using the app, contact us at <a href="mailto:forsty6777@gmail.com">forsty6777@gmail.com</a>. Location: No(47/A), KoMin KoChit Road, Yay Tar Shay Ward, near Shwe Gone Daing Skyway, Bahan Township, Yangon.</footer>
 </div>
 
@@ -1033,7 +1098,23 @@ function renderReferenceList(filter){
   var items=LANGUAGE_REFERENCE.filter(function(r){return!q||r.key.toLowerCase().indexOf(q)!==-1||r.desc.toLowerCase().indexOf(q)!==-1;});
   list.innerHTML=items.length?items.map(function(r){return'<div class="ref-item"><div class="ref-key">'+escapeHtml(r.key)+'</div><div class="ref-desc">'+escapeHtml(r.desc)+'</div></div>';}).join(""):'<div class="empty-state" style="padding:16px;">No matches.</div>';
 }
-
+// Contact Form Handler
+var contactForm = document.getElementById('contactForm');
+if(contactForm){
+  contactForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = document.getElementById('contactName').value;
+    var email = document.getElementById('contactEmail').value;
+    var topic = document.getElementById('contactTopic').value;
+    var message = document.getElementById('contactMessage').value;
+    
+    // In a full app, you would send this to an API or EmailJS.
+    // For this prototype, we just show a success message.
+    console.log("Contact Form Submitted:", { name, email, topic, message });
+    toast("Message sent! We will reply within 48 hours.");
+    contactForm.reset();
+  });
+}
 document.addEventListener("DOMContentLoaded",function(){
   byId("privacyModal").classList.remove("hidden");
   if(EMAILJS_DEFAULT.publicKey&&window.emailjs){try{window.emailjs.init({publicKey:EMAILJS_DEFAULT.publicKey});}catch(e){console.warn("EmailJS init failed:",e);}}
